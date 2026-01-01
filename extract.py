@@ -5,6 +5,8 @@ from os import environ as ENV, _Environ
 from dotenv import load_dotenv, set_key
 from datetime import datetime
 
+import sqlite3
+
 BASE_URL = 'https://www.strava.com/api/v3'
 
 
@@ -137,8 +139,8 @@ if __name__ == '__main__':
 
     check_access_token(ENV)
 
-    recent_runs = get_stats(ENV)['recent_run_totals']
-    all_runs = get_stats(ENV)['all_run_totals']
+    # recent_runs = get_stats(ENV)['recent_run_totals']
+    # all_runs = get_stats(ENV)['all_run_totals']
     activities_basic = get_activities(ENV)
     activity_ids = get_activity_ids(activities_basic)
     activities_detailed = get_detailed_activities(ENV, activity_ids)
