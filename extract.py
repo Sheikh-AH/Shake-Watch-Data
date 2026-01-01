@@ -144,6 +144,6 @@ if __name__ == '__main__':
     activities_basic = get_activities(ENV)
     activity_ids = get_activity_ids(activities_basic)
     activities_detailed = get_detailed_activities(ENV, activity_ids)
-    streams = get_activity_streams(ENV, activity_ids[1])
+    # streams = get_activity_streams(ENV, activity_ids[1])
 
-    print(streams)
+    print(activities_detailed[0])
