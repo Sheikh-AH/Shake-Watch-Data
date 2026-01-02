@@ -5,9 +5,18 @@ from os import environ as ENV, _Environ
 from dotenv import load_dotenv, set_key
 from datetime import datetime
 
-import sqlite3
+from sqlite3 import connect, Connection
 
 BASE_URL = 'https://www.strava.com/api/v3'
+
+
+def get_connection(dbname: str):
+    """get connection to database"""
+    conn = connect(dbname)
+    cur = conn.cursor()
+    cur.execute('PRAGMA foreign_keys = True')
+    cur.close()
+    return conn
 
 
 def get_access_token(config: _Environ, call_time: int) -> None:
@@ -139,11 +148,17 @@ if __name__ == '__main__':
 
     check_access_token(ENV)
 
+    conn = get_connection('watch_data')
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO activities (activity_name, calories) VALUES ('test', 200);")
+    conn.commit()
+    cur.close()
     # recent_runs = get_stats(ENV)['recent_run_totals']
     # all_runs = get_stats(ENV)['all_run_totals']
-    activities_basic = get_activities(ENV)
-    activity_ids = get_activity_ids(activities_basic)
-    activities_detailed = get_detailed_activities(ENV, activity_ids)
+    # activities_basic = get_activities(ENV)
+    # activity_ids = get_activity_ids(activities_basic)
+    # activities_detailed = get_detailed_activities(ENV, activity_ids)
     # streams = get_activity_streams(ENV, activity_ids[1])
 
-    print(activities_detailed[0])
+    # print(activities_detailed[0])
