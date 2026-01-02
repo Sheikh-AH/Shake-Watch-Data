@@ -1,3 +1,14 @@
+CREATE TABLE IF NOT EXISTS activity_types (
+    activity_type_id INTEGER PRIMARY KEY,
+    activity_type_name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cities (
+    city_id INTEGER PRIMARY KEY,
+    city_name VARCHAR(30) NOT NULL
+);
+
+
 CREATE TABLE IF NOT EXISTS activities (
     activity_id INTEGER PRIMARY KEY,
     activity_name VARCHAR(255), --name in api data
@@ -6,9 +17,11 @@ CREATE TABLE IF NOT EXISTS activities (
     moving_time INTEGER,
     elapsed_time INTEGER,
     total_elevation_gain INTEGER,
-    activity_type VARCHAR(20), --sport_type in api data
+    activity_type_id VARCHAR(20) NOT NULL, --sport_type in api data
     start_at TIMESTAMP, --start_date_local in api data
-    location_city VARCHAR(30)
+    city_id VARCHAR(30),
+    FOREIGN KEY (activity_type_id) REFERENCES activity_types(activity_type_id) ON DELETE NO ACTION,
+    FOREIGN KEY (city_id) REFERENCES cities(city_id) ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS stream_sets (
