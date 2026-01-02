@@ -101,7 +101,7 @@ def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[in
     """Check stored data for activiy ids."""
     cur = conn.cursor()
     cur.execute("SELECT activity_id FROM activities;")
-    stored_ids = cur.fetchall()
+    stored_ids = cur.fetchall()[0]
     missing_ids = [i for i in activity_ids if i not in stored_ids]
     return missing_ids
 
