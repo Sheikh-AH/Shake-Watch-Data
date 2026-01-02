@@ -11,7 +11,7 @@ BASE_URL = 'https://www.strava.com/api/v3'
 
 
 def get_connection(dbname: str) -> Connection:
-    """get connection to database"""
+    """Get connection to database"""
     conn = connect(dbname)
     cur = conn.cursor()
     cur.execute('PRAGMA foreign_keys = True')
@@ -62,6 +62,7 @@ def get_stats(config: _Environ) -> dict:
     response = get(
         f'{BASE_URL}/athletes/{config["ATHLETE_ID"]}/stats',
         headers=auth_info).json()
+
     return response
 
 
@@ -74,6 +75,7 @@ def get_activities(config: _Environ) -> list[dict]:
         f'{BASE_URL}{end_point}',
         headers=auth_info
     ).json()
+
     return response
 
 
@@ -91,23 +93,24 @@ def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
         f'{BASE_URL}{end_point}',
         headers=auth_info
     ).json()
+
     return response
 
 
 def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[int]:
     """Check stored data for activiy ids."""
+
     cur = conn.cursor()
     cur.execute("SELECT activity_id FROM activities;")
     stored_ids = cur.fetchall()[0]
     missing_ids = [i for i in activity_ids if i not in stored_ids]
+
     return missing_ids
 
 
 def get_detailed_activities(config: _Environ, activity_ids: list[int]):
-    activities_detailed_info = []
-    for activity_id in activity_ids:
-        activities_detailed_info.append(get_activity_info(config, activity_id))
-    return (activities_detailed_info)
+    """Get detailed activity information from id."""
+    return [get_activity_info(config, activity_id) for activity_id in activity_ids]
 
 
 def get_activity_streams(config: _Environ, activity_id: int) -> list[dict]:
