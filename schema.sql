@@ -29,4 +29,14 @@ CREATE TABLE IF NOT EXISTS stream_sets (
     activity_id INTEGER,
     streams BLOB NOT NULL,
     FOREIGN KEY (activity_id) REFERENCES activities(activity_id) ON DELETE CASCADE
-)
+);
+
+INSERT INTO activity_types (activity_type_name)
+VALUES (
+    'Running'
+);
+
+INSERT INTO cities (city_name)
+VALUES (
+    'London'
+);

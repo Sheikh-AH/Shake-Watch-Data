@@ -10,7 +10,7 @@ from sqlite3 import connect, Connection
 BASE_URL = 'https://www.strava.com/api/v3'
 
 
-def get_connection(dbname: str):
+def get_connection(dbname: str) -> Connection:
     """get connection to database"""
     conn = connect(dbname)
     cur = conn.cursor()
@@ -97,9 +97,13 @@ def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
     return response
 
 
-def check_cache_for_activity_id():
+def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[int]:
     """Check stored data for activiy ids."""
-    pass
+    cur = conn.cursor()
+    cur.execute("SELECT activity_id FROM activities;")
+    stored_ids = cur.fetchall()
+    missing_ids = [i for i in activity_ids if i not in stored_ids]
+    return missing_ids
 
 
 def get_detailed_activities(config: _Environ, activity_ids: list[int]):
@@ -149,11 +153,8 @@ if __name__ == '__main__':
     check_access_token(ENV)
 
     conn = get_connection('watch_data')
-    cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO activities (activity_name, calories) VALUES ('test', 200);")
-    conn.commit()
-    cur.close()
+    missing_ids = filter_for_stored_data(conn, [1, 2, 3, 4])
+    print(missing_ids)
     # recent_runs = get_stats(ENV)['recent_run_totals']
     # all_runs = get_stats(ENV)['all_run_totals']
     # activities_basic = get_activities(ENV)
