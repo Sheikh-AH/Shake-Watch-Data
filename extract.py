@@ -79,10 +79,7 @@ def get_activities(config: _Environ) -> list[dict]:
 
 def get_activity_ids(activities: list[dict]) -> list[int]:
     """Get the id's for all activities."""
-    activity_ids = []
-    for activity in activities:
-        activity_ids.append(activity['id'])
-    return activity_ids
+    return [activity['id'] for activity in activities]
 
 
 def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
