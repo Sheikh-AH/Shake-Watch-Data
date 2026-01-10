@@ -90,6 +90,7 @@ def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[in
     cur = conn.cursor()
     cur.execute("SELECT activity_id FROM activities;")
     stored_ids = cur.fetchall()[0]
+    cur.close()
     missing_ids = [i for i in activity_ids if i not in stored_ids]
 
     return missing_ids
@@ -151,15 +152,20 @@ def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[
     return [get_activity_streams(config, activity_id) for activity_id in activity_ids]
 
 
+def main(conn: Connection, config: _Environ):
+    """Main function to extract data."""
+    activities_basic = get_activities(config)
+    activity_ids = get_activity_ids(activities_basic)
+    # activity_ids = filter_for_stored_data(conn, activity_ids)
+    activities_detailed = get_detailed_activities(config, activity_ids)
+    streams = get_all_activity_streams(config, activity_ids)
+    return activities_detailed, activity_ids, streams
+
+
 if __name__ == '__main__':
 
     load_dotenv()
     check_access_token(ENV)
     conn = get_connection('watch_data')
-
-    activities_basic = get_activities(ENV)
-    activity_ids = get_activity_ids(activities_basic)
-    # activity_ids = filter_for_stored_data(conn, activity_ids)
-    activities_detailed = get_detailed_activities(ENV, activity_ids)
-    streams = get_all_activity_streams(ENV, activity_ids)
+    activities_detailed, activity_ids, streams = main(conn, ENV)
     conn.close()
