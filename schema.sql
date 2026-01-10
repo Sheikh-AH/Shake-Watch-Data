@@ -33,5 +33,6 @@ INSERT INTO activity_types (activity_type_name)
 VALUES 
     ('Run'),
     ('Walk'),
-    ('WeightTraining')
+    ('WeightTraining'),
+    ('Workout')
 ;
