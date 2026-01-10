@@ -84,19 +84,6 @@ def get_activity_ids(activities: list[dict]) -> list[int]:
     return [activity['id'] for activity in activities]
 
 
-def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
-    """Get a list of activities."""
-
-    auth_info = {"Authorization": f'Bearer {config["ACCESS_TOKEN"]}'}
-    end_point = f'/activities/{activity_id}'
-    response = get(
-        f'{BASE_URL}{end_point}',
-        headers=auth_info
-    ).json()
-
-    return response
-
-
 def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[int]:
     """Check stored data for activiy ids."""
 
@@ -108,7 +95,20 @@ def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[in
     return missing_ids
 
 
-def get_detailed_activities(config: _Environ, activity_ids: list[int]):
+def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
+    """Get a info of activities."""
+
+    auth_info = {"Authorization": f'Bearer {config["ACCESS_TOKEN"]}'}
+    end_point = f'/activities/{activity_id}'
+    response = get(
+        f'{BASE_URL}{end_point}',
+        headers=auth_info
+    ).json()
+
+    return response
+
+
+def get_detailed_activities(config: _Environ, activity_ids: list[dict]):
     """Get detailed activity information from id."""
     return [get_activity_info(config, activity_id) for activity_id in activity_ids]
 
@@ -143,23 +143,23 @@ def get_activity_streams(config: _Environ, activity_id: int) -> list[dict]:
         params=params
     ).json()
 
-    return response
+    return (activity_id, response)
+
+
+def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[dict]:
+    """Get all activity streams from a list of activity ids."""
+    return [get_activity_streams(config, activity_id) for activity_id in activity_ids]
 
 
 if __name__ == '__main__':
 
     load_dotenv()
-
     check_access_token(ENV)
-
     conn = get_connection('watch_data')
-    missing_ids = filter_for_stored_data(conn, [1, 2, 3, 4])
-    print(missing_ids)
-    # recent_runs = get_stats(ENV)['recent_run_totals']
-    # all_runs = get_stats(ENV)['all_run_totals']
-    # activities_basic = get_activities(ENV)
-    # activity_ids = get_activity_ids(activities_basic)
-    # activities_detailed = get_detailed_activities(ENV, activity_ids)
-    # streams = get_activity_streams(ENV, activity_ids[1])
 
-    # print(activities_detailed[0])
+    activities_basic = get_activities(ENV)
+    activity_ids = get_activity_ids(activities_basic)
+    # activity_ids = filter_for_stored_data(conn, activity_ids)
+    activities_detailed = get_detailed_activities(ENV, activity_ids)
+    streams = get_all_activity_streams(ENV, activity_ids)
+    conn.close()
