@@ -16,7 +16,14 @@ def get_type_mapping(conn: Connection) -> dict:
         "SELECT activity_type_id, activity_type_name FROM activity_types")
     rows = cursor.fetchall()
     cursor.close()
-    return {row[0]: row[1] for row in rows}
+    return {row[1]: row[0] for row in rows}
+
+
+def convert_types_to_ids(mapping: dict, activities: list[dict]) -> list[dict]:
+    """Convert activity type names to their corresponding IDs."""
+    for activity in activities:
+        activity['type_id'] = mapping.get(activity['sport_type'])
+    return activities
 
 
 if __name__ == '__main__':
@@ -24,8 +31,9 @@ if __name__ == '__main__':
     load_dotenv()
     conn = get_connection('watch_data')
 
-    # activities_detailed, activity_ids, streams = extract_data(conn, ENV)
+    activities_detailed, activity_ids, streams = extract_data(conn, ENV)
     type_mapping = get_type_mapping(conn)
-    print(type_mapping)
-
+    activities = convert_types_to_ids(type_mapping, activities_detailed)
+    for activity in activities:
+        print(activity['type_id'], activity['sport_type'])
     conn.close()
