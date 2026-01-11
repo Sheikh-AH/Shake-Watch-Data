@@ -1,3 +1,8 @@
+SELECT pg_terminate_backend(pg_stat_activity.pid)
+FROM pg_stat_activity
+WHERE pg_stat_activity.datname = 'watch_data'
+  AND pid <> pg_backend_pid();
+  
 DROP DATABASE IF EXISTS watch_data;
 CREATE DATABASE watch_data;
 \c watch_data;
