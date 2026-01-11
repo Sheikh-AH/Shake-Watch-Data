@@ -6,7 +6,7 @@ from datetime import datetime
 
 from sqlite3 import Connection
 
-from extract import get_connection, main as extract_data
+from extract import get_connection, extract_data
 
 
 def get_type_mapping(conn: Connection) -> dict:
@@ -26,14 +26,51 @@ def convert_types_to_ids(mapping: dict, activities: list[dict]) -> list[dict]:
     return activities
 
 
+def clean_activities(conn: Connection, activities_detailed: list[dict]) -> list[dict]:
+    """Process activities data."""
+    type_mapping = get_type_mapping(conn)
+    activities = convert_types_to_ids(type_mapping, activities_detailed)
+    return activities
+
+
+def filter_streams(streams: dict) -> dict:
+    """Process streams data."""
+    list_of_streams = [
+        "time",
+        "distance",
+        "latlng",
+        "altitude",
+        "velocity_smooth",
+        "heartrate",
+        "cadence",
+        "watts",
+        "temp",
+        "moving",
+        "grade_smooth"
+    ]
+    filtered_streams = {}
+    for key in streams.keys():
+        if key in list_of_streams:
+            filtered_streams[key] = streams[key]['data']
+    return filtered_streams
+
+
+def filer_all_streams(streams: list[dict]) -> list[dict]:
+    """Filter all streams data."""
+    return [(stream[0], filter_streams(stream[1])) for stream in streams]
+
+
+def clean_data(conn, ENV: _Environ):
+    """Main function to clean and transform data."""
+    activities_detailed, streams = extract_data(conn, ENV)
+    clean_activities_data = clean_activities(conn, activities_detailed)
+    clean_streams_data = filer_all_streams(streams)
+    return clean_activities_data, clean_streams_data
+
+
 if __name__ == '__main__':
 
     load_dotenv()
-    conn = get_connection('watch_data')
+    conn = get_connection()
 
-    activities_detailed, activity_ids, streams = extract_data(conn, ENV)
-    type_mapping = get_type_mapping(conn)
-    activities = convert_types_to_ids(type_mapping, activities_detailed)
-    for activity in activities:
-        print(activity['type_id'], activity['sport_type'])
     conn.close()

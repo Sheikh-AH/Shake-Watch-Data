@@ -4,3 +4,4 @@ flask
 requests
 dotenv
 datetime
+psycopg2-binary
