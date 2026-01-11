@@ -5,3 +5,9 @@ requests
 dotenv
 datetime
 psycopg2-binary
+supabase
+streamlit
+ipykernel
+sqlalchemy
+plotly
+nbformat
