@@ -5,18 +5,20 @@ from os import environ as ENV, _Environ
 from dotenv import load_dotenv, set_key
 from datetime import datetime
 
-from sqlite3 import connect, Connection
+from psycopg2 import connect
 
 BASE_URL = 'https://www.strava.com/api/v3'
 
 
-def get_connection(dbname: str) -> Connection:
-    """Get connection to database"""
-    conn = connect(dbname)
-    cur = conn.cursor()
-    cur.execute('PRAGMA foreign_keys = True')
-    cur.close()
-    return conn
+def get_connection():
+    connection = connect(
+        user=ENV['DB_USER'],
+        password=ENV['DB_PASSWORD'],
+        host=ENV['DB_HOST'],
+        port=ENV['DB_PORT'],
+        dbname=ENV['DB_NAME']
+    )
+    return connection
 
 
 def get_access_token(config: _Environ, call_time: int) -> None:
@@ -87,10 +89,9 @@ def get_activity_ids(activities: list[dict]) -> list[int]:
 def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[int]:
     """Check stored data for activiy ids."""
 
-    cur = conn.cursor()
-    cur.execute("SELECT activity_id FROM activities;")
-    stored_ids = cur.fetchall()[0]
-    cur.close()
+    with conn.cursor() as cur:
+        cur.execute("SELECT activity_id FROM activities;")
+        stored_ids = cur.fetchall()[0]
     missing_ids = [i for i in activity_ids if i not in stored_ids]
 
     return missing_ids
@@ -152,20 +153,20 @@ def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[
     return [get_activity_streams(config, activity_id) for activity_id in activity_ids]
 
 
-def main(conn: Connection, config: _Environ):
+def extract_data(conn: Connection, config: _Environ):
     """Main function to extract data."""
     activities_basic = get_activities(config)
     activity_ids = get_activity_ids(activities_basic)
     # activity_ids = filter_for_stored_data(conn, activity_ids)
     activities_detailed = get_detailed_activities(config, activity_ids)
     streams = get_all_activity_streams(config, activity_ids)
-    return activities_detailed, activity_ids, streams
+    return activities_detailed, streams
 
 
 if __name__ == '__main__':
 
     load_dotenv()
-    check_access_token(ENV)
-    conn = get_connection('watch_data')
-    activities_detailed, activity_ids, streams = main(conn, ENV)
-    conn.close()
+    # check_access_token(ENV)
+    # conn = get_connection('watch_data')
+    # activities_detailed, streams = extract_data(conn, ENV)
+    # conn.close()
