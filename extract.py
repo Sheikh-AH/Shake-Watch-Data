@@ -17,6 +17,7 @@ def get_connection():
         host=ENV['DB_HOST'],
         port=ENV['DB_PORT'],
         dbname=ENV['DB_NAME']
+
     )
     return connection
 
@@ -91,10 +92,12 @@ def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[in
 
     with conn.cursor() as cur:
         cur.execute("SELECT activity_id FROM activities;")
-        stored_ids = cur.fetchall()[0]
-    missing_ids = [i for i in activity_ids if i not in stored_ids]
-
-    return missing_ids
+        stored_ids = cur.fetchall()
+        if stored_ids:
+            s_ids = [i[0] for i in stored_ids]
+            missing_ids = [i for i in activity_ids if i not in s_ids]
+            return missing_ids
+    return activity_ids
 
 
 def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
@@ -155,9 +158,10 @@ def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[
 
 def extract_data(conn: Connection, config: _Environ):
     """Main function to extract data."""
+    check_access_token(config)
     activities_basic = get_activities(config)
     activity_ids = get_activity_ids(activities_basic)
-    # activity_ids = filter_for_stored_data(conn, activity_ids)
+    activity_ids = filter_for_stored_data(conn, activity_ids)
     activities_detailed = get_detailed_activities(config, activity_ids)
     streams = get_all_activity_streams(config, activity_ids)
     return activities_detailed, streams
@@ -166,7 +170,7 @@ def extract_data(conn: Connection, config: _Environ):
 if __name__ == '__main__':
 
     load_dotenv()
-    # check_access_token(ENV)
+    check_access_token(ENV)
     # conn = get_connection('watch_data')
     # activities_detailed, streams = extract_data(conn, ENV)
-    # conn.close()
+    conn.close()
