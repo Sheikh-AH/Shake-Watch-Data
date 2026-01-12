@@ -138,11 +138,11 @@ if __name__ == '__main__':
     activities_df, activity_types_df, stream_sets_df = get_dataframes(conn)
     activities_types_streams = join_data(conn)
     gen_run_list(activities_types_streams)
-    # activity_id = activities_df.iloc[activity_idx]['activity_id']
-    # st.title(f"Activity: {activities_df.iloc[activity_idx]['activity_name']}")
+    activity_id = activities_df.iloc[0]['activity_id']
+    st.title(f"Activity: {activities_df.iloc[0]['activity_name']}")
 
-    # filtered_data = activities_types_streams[activities_types_streams['activity_id'] == activity_id]
-    # st.write(f"Data points: {filtered_data.shape[0]}")
+    filtered_data = activities_types_streams[activities_types_streams['activity_id'] == activity_id]
+    st.write(f"Data points: {filtered_data.shape[0]}")
 
-    # fig = gen_disttime_plot(activities_types_streams, activity_id)
-    # st.plotly_chart(fig, use_container_width=True)
+    fig = gen_disttime_plot(activities_types_streams, activity_id)
+    st.plotly_chart(fig, use_container_width=True)

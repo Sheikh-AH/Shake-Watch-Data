@@ -3,8 +3,8 @@
 from os import environ as ENV
 from dotenv import load_dotenv
 
-from extract import get_connection
-from transform import clean_data
+from ETL.extract import get_connection
+from ETL.transform import clean_data
 
 
 def upload_activities(conn, activities: list[dict]):

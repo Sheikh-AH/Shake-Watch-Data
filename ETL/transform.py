@@ -6,7 +6,7 @@ from datetime import datetime
 
 from sqlite3 import Connection
 
-from extract import get_connection, extract_data
+from ETL.extract import get_connection, extract_data
 
 
 def get_type_mapping(conn: Connection) -> dict:
