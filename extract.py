@@ -7,6 +7,7 @@ from datetime import datetime
 
 from psycopg2 import connect
 
+
 BASE_URL = 'https://www.strava.com/api/v3'
 
 
@@ -87,7 +88,7 @@ def get_activity_ids(activities: list[dict]) -> list[int]:
     return [activity['id'] for activity in activities]
 
 
-def filter_for_stored_data(conn: Connection, activity_ids: list[int]) -> list[int]:
+def filter_for_stored_data(conn, activity_ids: list[int]) -> list[int]:
     """Check stored data for activiy ids."""
 
     with conn.cursor() as cur:
@@ -156,7 +157,7 @@ def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[
     return [get_activity_streams(config, activity_id) for activity_id in activity_ids]
 
 
-def extract_data(conn: Connection, config: _Environ):
+def extract_data(conn, config: _Environ):
     """Main function to extract data."""
     check_access_token(config)
     activities_basic = get_activities(config)
@@ -173,4 +174,4 @@ if __name__ == '__main__':
     check_access_token(ENV)
     # conn = get_connection('watch_data')
     # activities_detailed, streams = extract_data(conn, ENV)
-    conn.close()
+    # conn.close()

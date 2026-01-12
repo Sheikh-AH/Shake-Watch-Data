@@ -1,6 +1,6 @@
 """Load data into the database."""
 
-from os import environ as ENV, _Environ
+from os import environ as ENV
 from dotenv import load_dotenv
 
 from extract import get_connection
@@ -8,6 +8,7 @@ from transform import clean_data
 
 
 def upload_activities(conn, activities: list[dict]):
+    print(2)
     """Load activities into the database."""
     cursor = conn.cursor()
     for activity in activities:
@@ -44,6 +45,7 @@ def upload_activities(conn, activities: list[dict]):
 
 
 def upload_streams(conn, streams: tuple):
+    print(1)
     """Load activity streams into the database."""
     cursor = conn.cursor()
     for activity_id, stream_data in streams:
@@ -89,6 +91,7 @@ if __name__ == '__main__':
     conn = get_connection()
 
     clean_activities_data, clean_streams_data = clean_data(conn, ENV)
+    print(clean_activities_data)
 
     upload_activities(conn, clean_activities_data)
     upload_streams(conn, clean_streams_data)
