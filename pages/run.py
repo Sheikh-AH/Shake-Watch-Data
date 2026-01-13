@@ -126,23 +126,14 @@ def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
     return fig
 
 
-def gen_run_list(df: pd.DataFrame) -> None:
-    run_activities = df[df['activity_type_name'] == 'Run']
-    run_list = run_activities[[
-        'activity_id', 'activity_name']].drop_duplicates().to_dict('records')
-    st.write(run_activities)
-
-
 if __name__ == '__main__':
     conn = get_engine(ENV)
-    activities_df, activity_types_df, stream_sets_df = get_dataframes(conn)
     activities_types_streams = join_data(conn)
-    gen_run_list(activities_types_streams)
-    activity_id = activities_df.iloc[0]['activity_id']
-    st.title(f"Activity: {activities_df.iloc[0]['activity_name']}")
 
+    activity_id = st.session_state.get('activity_id')
     filtered_data = activities_types_streams[activities_types_streams['activity_id'] == activity_id]
-    st.write(f"Data points: {filtered_data.shape[0]}")
+
+    st.title(f"Activity: {filtered_data['activity_name']}")
 
     fig = gen_disttime_plot(activities_types_streams, activity_id)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')

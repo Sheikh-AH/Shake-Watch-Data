@@ -57,11 +57,11 @@ def join_data(conn):
 def activity_log_page(config: _Environ):
     st.title("Activity Log")
     conn = get_engine(config)
-    activities_df, activity_types_df, stream_sets_df = get_dataframes(conn)
     activities_types_streams = join_data(conn)
-    st.dataframe(
-        activities_types_streams[['start_datetime', 'activity_name',
-                                  'activity_type_name', 'calories', 'elapsed_time']],
+    df = activities_types_streams[['start_datetime', 'activity_name',
+                                  'activity_type_name', 'calories', 'elapsed_time', 'activity_id']]
+    event = st.dataframe(
+        df,
         column_config={
             'start_datetime': st.column_config.DateColumn(
                 "Started At",
@@ -86,9 +86,17 @@ def activity_log_page(config: _Environ):
                 help="Total elapsed time of the activity in seconds.",
                 format="%d sec",
             ),
+            'activity_id': None,
         },
+        on_select="rerun",
+        selection_mode="single-row",
         hide_index=True
     )
+
+    if event.selection.rows:
+        selected_row = df.iloc[event.selection.rows[0]]
+        st.session_state['activity_id'] = selected_row['activity_id']
+        st.switch_page("pages/run.py")
 
 
 if __name__ == "__main__":
