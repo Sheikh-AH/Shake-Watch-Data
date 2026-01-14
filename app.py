@@ -1,3 +1,5 @@
+"""Starting point for the Streamlit Watch Data Dashboard application."""
+
 import streamlit as st
 
 st.set_page_config(page_title="Watch Data Dashboard", layout="wide")

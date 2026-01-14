@@ -3,8 +3,8 @@
 from os import environ as ENV
 from dotenv import load_dotenv
 
-from ETL.extract import get_connection
-from ETL.transform import clean_data
+from extract import get_connection
+from transform import clean_data
 
 
 def upload_activities(conn, activities: list[dict]):
@@ -86,14 +86,4 @@ def upload_streams(conn, streams: tuple):
 
 
 if __name__ == '__main__':
-
-    load_dotenv()
-    conn = get_connection()
-
-    clean_activities_data, clean_streams_data = clean_data(conn, ENV)
-    print(clean_activities_data)
-
-    upload_activities(conn, clean_activities_data)
-    upload_streams(conn, clean_streams_data)
-
-    conn.close()
+    pass
