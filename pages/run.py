@@ -18,7 +18,7 @@ def get_engine(_config: _Environ):
 
 def join_data(conn):
     query = """
-    SELECT 
+    SELECT
         a.activity_id,
         a.activity_name,
         a.calories,
@@ -46,7 +46,8 @@ def join_data(conn):
     JOIN activity_types at ON a.activity_type_id = at.activity_type_id
     JOIN stream_sets ss ON a.activity_id = ss.activity_id
     """
-    activities_types_streams = pd.read_sql(query, conn)
+    activities_types_streams = pd.read_sql(
+        query, conn)
     return activities_types_streams
 
 
@@ -89,11 +90,9 @@ def normalize_values(series: pd.Series) -> pd.Series:
 def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
     df_filtered = filter_data(df, activity_id)
 
-    # Normalize values for better comparison
     for col in ['stream_distance', 'heartrate', 'altitude', 'velocity_smooth', 'cadence', 'watts']:
         df_filtered[col] = normalize_values(df_filtered[col])
 
-    # Map metric names to columns
     metric_map = {
         "Distance": ("stream_distance", "Distance (m)"),
         "Heart Rate": ("heartrate", "Heart Rate (bpm)"),
@@ -105,7 +104,6 @@ def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
 
     fig = go.Figure()
 
-    # Add all metrics
     for metric, (col, metric_label) in metric_map.items():
         fig.add_trace(go.Scatter(
             x=df_filtered['time'],
@@ -115,9 +113,9 @@ def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
         ))
 
     fig.update_layout(
-        title='Activity Metrics vs Time',
+        title='Normalised Activity Metrics vs Time',
         xaxis=dict(title='Time (seconds)'),
-        yaxis=dict(title='Normalized Values'),
+        yaxis=dict(title='Normalised Values'),
         hovermode='x unified'
     )
 
@@ -131,7 +129,7 @@ if __name__ == '__main__':
     activity_id = st.session_state.get('activity_id')
     filtered_data = activities_types_streams[activities_types_streams['activity_id'] == activity_id]
 
-    st.title(f"Activity: {filtered_data['activity_name']}")
+    st.title(f"Activity: {filtered_data['activity_name'].iloc[0]}")
 
     fig = gen_disttime_plot(activities_types_streams, activity_id)
     st.plotly_chart(fig, width='stretch')
