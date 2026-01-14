@@ -1,29 +1,29 @@
 """Extract and process watch data."""
 
-from requests import get, post
-from os import environ as ENV, _Environ
-from dotenv import load_dotenv, set_key
 from datetime import datetime
+from os import _Environ
 
+from requests import get, post
+from dotenv import set_key
 from psycopg2 import connect
 
 
 BASE_URL = 'https://www.strava.com/api/v3'
 
 
-def get_connection():
+def get_connection(config: _Environ):
     """Get conneciton to PSTGRESQL database."""
     connection = connect(
-        user=ENV['DB_USER'],
-        password=ENV['DB_PASSWORD'],
-        host=ENV['DB_HOST'],
-        port=ENV['DB_PORT'],
-        dbname=ENV['DB_NAME']
+        user=config['DB_USER'],
+        password=config['DB_PASSWORD'],
+        host=config['DB_HOST'],
+        port=config['DB_PORT'],
+        dbname=config['DB_NAME']
     )
     return connection
 
 
-def get_access_token(config: _Environ, call_time: int) -> None:
+def get_access_token(config: _Environ) -> None:
     """Get initial access token and refresh token."""
 
     post_data = {
@@ -50,7 +50,7 @@ def check_access_token(config: _Environ) -> None:
             'grant_type': 'refresh_token'}
         response = post(
             'https://www.strava.com/api/v3/oauth/token',
-            data=post_data
+            data=post_data, timeout=10
         ).json()
         set_key('.env', "ACCESS_TOKEN", response['access_token'])
         set_key('.env', "EXPIRES_AT", str(response['expires_at']))
@@ -65,7 +65,7 @@ def get_stats(config: _Environ) -> dict:
     auth_info = {"Authorization": f'Bearer {config["ACCESS_TOKEN"]}'}
     response = get(
         f'{BASE_URL}/athletes/{config["ATHLETE_ID"]}/stats',
-        headers=auth_info).json()
+        headers=auth_info, timeout=10).json()
 
     return response
 
@@ -77,7 +77,7 @@ def get_activities(config: _Environ) -> list[dict]:
     end_point = '/athlete/activities'
     response = get(
         f'{BASE_URL}{end_point}',
-        headers=auth_info
+        headers=auth_info, timeout=10
     ).json()
 
     return response
@@ -85,7 +85,6 @@ def get_activities(config: _Environ) -> list[dict]:
 
 def get_activity_ids(activities: list[dict]) -> list[int]:
     """Get the id's for all activities."""
-    print(activities)
     return [activity['id'] for activity in activities]
 
 
@@ -109,7 +108,7 @@ def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
     end_point = f'/activities/{activity_id}'
     response = get(
         f'{BASE_URL}{end_point}',
-        headers=auth_info
+        headers=auth_info, timeout=10
     ).json()
 
     return response
@@ -147,7 +146,8 @@ def get_activity_streams(config: _Environ, activity_id: int) -> list[dict]:
     response = get(
         f'{BASE_URL}{end_point}',
         headers=auth_info,
-        params=params
+        params=params,
+        timeout=10
     ).json()
 
     return (activity_id, response)
