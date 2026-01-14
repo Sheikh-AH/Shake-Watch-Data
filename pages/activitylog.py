@@ -1,3 +1,5 @@
+"""Streamlit page to display all activities."""
+
 from os import environ as ENV, _Environ
 from dotenv import load_dotenv
 import pandas as pd
@@ -6,6 +8,7 @@ from sqlalchemy import create_engine
 
 
 def get_engine(_config: _Environ):
+    """Get sqlalchemy engine."""
     connection_string = (
         f"postgresql://{_config['DB_USER']}:{_config['DB_PASSWORD']}"
         f"@{_config['DB_HOST']}:{_config['DB_PORT']}/watch_data"
@@ -14,6 +17,7 @@ def get_engine(_config: _Environ):
 
 
 def get_dataframes(conn):
+    """Get dataframes for activities, activity types, and stream sets."""
     activities_df = pd.read_sql("SELECT * FROM activities", conn)
     activity_types_df = pd.read_sql("SELECT * FROM activity_types", conn)
     stream_sets_df = pd.read_sql("SELECT * FROM stream_sets", conn)
@@ -21,36 +25,19 @@ def get_dataframes(conn):
 
 
 def join_data(conn):
+    """Join all data into a single dataframe."""
     query = """
     SELECT 
-        a.activity_id,
-        a.activity_name,
-        a.calories,
-        a.distance,
-        a.moving_time,
-        a.elapsed_time,
-        a.total_elevation_gain,
-        a.activity_type_id,
-        a.start_datetime,
-        a.start_loc,
-        at.activity_type_name,
-        ss.stream_sets_id,
-        ss.time,
-        ss.distance as stream_distance,
-        ss.latlng,
-        ss.altitude,
-        ss.velocity_smooth,
-        ss.heartrate,
-        ss.cadence,
-        ss.watts,
-        ss.temp,
-        ss.moving,
-        ss.grade_smooth
+        a.*,
+        at.*,
+        ss.*
     FROM activities a
-    JOIN activity_types at ON a.activity_type_id = at.activity_type_id
-    JOIN stream_sets ss ON a.activity_id = ss.activity_id
+    JOIN activity_types at USING (activity_type_id)
+    JOIN stream_sets ss USING (activity_id)
     """
     activities_types_streams = pd.read_sql(query, conn)
+    activities_types_streams = activities_types_streams.loc[:,
+                                                            ~activities_types_streams.columns.duplicated()]
     return activities_types_streams
 
 
@@ -95,8 +82,12 @@ def activity_log_page(config: _Environ):
 
     if event.selection.rows:
         selected_row = df.iloc[event.selection.rows[0]]
-        st.session_state['activity_id'] = selected_row['activity_id']
-        st.switch_page("pages/run.py")
+
+        if selected_row['activity_type_name'] == 'Run':
+            st.session_state['activity_id'] = selected_row['activity_id']
+            st.switch_page("pages/run.py")
+        else:
+            st.warning("Details only available for runs")
 
 
 if __name__ == "__main__":

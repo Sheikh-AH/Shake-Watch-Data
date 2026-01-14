@@ -6,7 +6,7 @@ from datetime import datetime
 
 from sqlite3 import Connection
 
-from ETL.extract import get_connection, extract_data
+from extract import get_connection, extract_data
 
 
 def get_type_mapping(conn: Connection) -> dict:
@@ -60,17 +60,13 @@ def filer_all_streams(streams: list[dict]) -> list[dict]:
     return [(stream[0], filter_streams(stream[1])) for stream in streams]
 
 
-def clean_data(conn, ENV: _Environ):
+def clean_data(conn, ENV: _Environ, extract_data: tuple) -> tuple:
     """Main function to clean and transform data."""
-    activities_detailed, streams = extract_data(conn, ENV)
+    activities_detailed, streams = extract_data[0], extract_data[1]
     clean_activities_data = clean_activities(conn, activities_detailed)
     clean_streams_data = filer_all_streams(streams)
     return clean_activities_data, clean_streams_data
 
 
 if __name__ == '__main__':
-
-    load_dotenv()
-    conn = get_connection()
-
-    conn.close()
+    pass

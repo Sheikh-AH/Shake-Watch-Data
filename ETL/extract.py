@@ -12,13 +12,13 @@ BASE_URL = 'https://www.strava.com/api/v3'
 
 
 def get_connection():
+    """Get conneciton to PSTGRESQL database."""
     connection = connect(
         user=ENV['DB_USER'],
         password=ENV['DB_PASSWORD'],
         host=ENV['DB_HOST'],
         port=ENV['DB_PORT'],
         dbname=ENV['DB_NAME']
-
     )
     return connection
 
@@ -32,7 +32,7 @@ def get_access_token(config: _Environ, call_time: int) -> None:
         'code': config['AUTH_CODE'],
         'grant_type': 'authorization_code'}
     response = post('https://www.strava.com/api/v3/oauth/token',
-                    data=post_data).json()
+                    data=post_data, timeout=10).json()
 
     set_key('.env', "ACCESS_TOKEN", response['access_token'])
     set_key('.env', "EXPIRES_AT", str(response['expires_at']))
@@ -85,6 +85,7 @@ def get_activities(config: _Environ) -> list[dict]:
 
 def get_activity_ids(activities: list[dict]) -> list[int]:
     """Get the id's for all activities."""
+    print(activities)
     return [activity['id'] for activity in activities]
 
 
@@ -169,9 +170,4 @@ def extract_data(conn, config: _Environ):
 
 
 if __name__ == '__main__':
-
-    load_dotenv()
-    check_access_token(ENV)
-    # conn = get_connection('watch_data')
-    # activities_detailed, streams = extract_data(conn, ENV)
-    # conn.close()
+    pass

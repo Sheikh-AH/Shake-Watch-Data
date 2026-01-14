@@ -16,13 +16,6 @@ def get_engine(_config: _Environ):
     return create_engine(connection_string)
 
 
-def get_dataframes(conn):
-    activities_df = pd.read_sql("SELECT * FROM activities", conn)
-    activity_types_df = pd.read_sql("SELECT * FROM activity_types", conn)
-    stream_sets_df = pd.read_sql("SELECT * FROM stream_sets", conn)
-    return activities_df, activity_types_df, stream_sets_df
-
-
 def join_data(conn):
     query = """
     SELECT 
@@ -57,20 +50,7 @@ def join_data(conn):
     return activities_types_streams
 
 
-def normalize_values(series: pd.Series) -> pd.Series:
-    min_val = series.min()
-    max_val = series.max()
-    normalized_series = (series - min_val) / (max_val - min_val)
-    if 100 < series.max() <= 1000:
-        normalized_series *= 0.75
-    elif 100 > series.max() >= 25:
-        normalized_series *= 0.5
-    elif 25 > series.max():
-        normalized_series *= 0.25
-    return normalized_series
-
-
-def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
+def filter_data(df: pd.DataFrame, activity_id: int) -> pd.DataFrame:
     df_filtered = df[df['activity_id'] == activity_id].copy()
 
     # Explode all array columns
@@ -90,6 +70,24 @@ def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
     df_filtered['cadence'] = pd.to_numeric(
         df_filtered['cadence'], errors='coerce')
     df_filtered['watts'] = pd.to_numeric(df_filtered['watts'], errors='coerce')
+    return df_filtered
+
+
+def normalize_values(series: pd.Series) -> pd.Series:
+    min_val = series.min()
+    max_val = series.max()
+    normalized_series = (series - min_val) / (max_val - min_val)
+    if 100 < series.max() <= 1000:
+        normalized_series *= 0.75
+    elif 100 > series.max() >= 25:
+        normalized_series *= 0.5
+    elif 25 > series.max():
+        normalized_series *= 0.25
+    return normalized_series
+
+
+def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
+    df_filtered = filter_data(df, activity_id)
 
     # Normalize values for better comparison
     for col in ['stream_distance', 'heartrate', 'altitude', 'velocity_smooth', 'cadence', 'watts']:
