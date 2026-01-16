@@ -48,7 +48,7 @@ def activity_log_page(config: _Environ):
     conn = get_engine(config)
     activities_types_streams = get_activities_data(conn)
     df = activities_types_streams[['start_datetime', 'activity_name',
-                                  'activity_type_name', 'calories', 'elapsed_time', 'activity_id']]
+                                  'activity_type_name', 'calories', 'elapsed_time', 'activity_id']].sort_values(by='start_datetime', ascending=False)
     event = st.dataframe(
         df,
         column_config={
@@ -79,7 +79,8 @@ def activity_log_page(config: _Environ):
         },
         on_select="rerun",
         selection_mode="single-row",
-        hide_index=True
+        hide_index=True,
+
     )
 
     if event.selection.rows:
