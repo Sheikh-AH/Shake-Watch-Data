@@ -24,16 +24,18 @@ def get_dataframes(conn):
     return activities_df, activity_types_df, stream_sets_df
 
 
-def join_data(conn):
+def get_activities_data(conn):
     """Join all data into a single dataframe."""
     query = """
     SELECT 
-        a.*,
-        at.*,
-        ss.*
+        a.start_datetime,
+        a.calories,
+        a.elapsed_time,
+        a.activity_id,
+        a.activity_name,
+        at.activity_type_name
     FROM activities a
-    JOIN activity_types at USING (activity_type_id)
-    JOIN stream_sets ss USING (activity_id)
+    JOIN activity_types at USING (activity_type_id);
     """
     activities_types_streams = pd.read_sql(query, conn)
     activities_types_streams = activities_types_streams.loc[:,
@@ -44,7 +46,7 @@ def join_data(conn):
 def activity_log_page(config: _Environ):
     st.title("Activity Log")
     conn = get_engine(config)
-    activities_types_streams = join_data(conn)
+    activities_types_streams = get_activities_data(conn)
     df = activities_types_streams[['start_datetime', 'activity_name',
                                   'activity_type_name', 'calories', 'elapsed_time', 'activity_id']]
     event = st.dataframe(

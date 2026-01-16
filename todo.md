@@ -12,3 +12,7 @@
 - remove top text when Run page loaded
 - add headline metrics to run pages
 - add records page e.g. longest distance, most sleep etc.
+- remove engine
+- view for graphs activity metrics
+-plot nine
+
