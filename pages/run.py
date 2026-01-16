@@ -114,12 +114,29 @@ def gen_disttime_plot(df: pd.DataFrame) -> None:
     st.plotly_chart(fig, width='stretch')
 
 
+def summary_metrics(df: pd.DataFrame) -> None:
+    total_distance = df['distance'].iloc[0] / 1000
+    total_time = df['elapsed_time'].iloc[0] / 60
+    avg_speed = total_distance / (total_time / 60)
+    total_calories = df['calories'].iloc[0]
+
+    st.subheader("Summary Stats")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric(f"Total Distance", f"{total_distance:.2f} km")
+    with col2:
+        st.metric(f"Total Time", f"{total_time:.2f} mins")
+    with col3:
+        st.metric(f"Average Speed", f"{avg_speed:.2f} km/h")
+    with col4:
+        st.metric(f"Total Calories Burned", f"{total_calories} kcal")
+
 if __name__ == '__main__':
     conn = get_engine(ENV)
     activity_id = st.session_state.get('activity_id')
     activities_types_streams = join_data(conn, activity_id)
 
     st.title(f"Activity: {activities_types_streams['activity_name'].iloc[0]}")
-
-    fig = gen_disttime_plot(activities_types_streams)
+    summary_metrics(activities_types_streams)
+    gen_disttime_plot(activities_types_streams)
     
