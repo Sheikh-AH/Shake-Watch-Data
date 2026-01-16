@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import pandas as pd
 from sqlalchemy import create_engine
 from os import environ as ENV, _Environ
-from plotly import graph_objects as go
+from plotly import graph_objects as go, express as px
 
 load_dotenv()
 
@@ -65,6 +65,20 @@ def explode_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def get_id() -> int:
+    try:
+        activity_id = st.session_state.get('activity_id')
+        st.query_params["activity_id"] = st.session_state['activity_id']
+    except KeyError:
+        if st.query_params.get("activity_id") is None:
+            st.error(
+                "No activity selected. Please go back to the Activity Log and select an activity.")
+            st.stop()
+        st.session_state['activity_id'] = st.query_params.get("activity_id")
+        activity_id = st.session_state['activity_id']
+    return activity_id
+
+
 def normalize_values(series: pd.Series) -> pd.Series:
     min_val = series.min()
     max_val = series.max()
@@ -78,29 +92,28 @@ def normalize_values(series: pd.Series) -> pd.Series:
     return normalized_series
 
 
-def gen_disttime_plot(df: pd.DataFrame) -> None:
-    df = explode_data(df)
+def gen_disttime_plot(org_df: pd.DataFrame) -> None:
 
+    df = org_df.copy()
     for col in ['stream_distance', 'heartrate', 'altitude', 'velocity_smooth', 'cadence', 'watts']:
         df[col] = normalize_values(df[col])
 
     metric_map = {
-        "Distance": ("stream_distance", "Distance (m)"),
-        "Heart Rate": ("heartrate", "Heart Rate (bpm)"),
-        "Altitude": ("altitude", "Altitude (m)"),
-        "Velocity": ("velocity_smooth", "Velocity (m/s)"),
-        "Cadence": ("cadence", "Cadence (rpm)"),
-        "Power": ("watts", "Power (W)")
+        "stream_distance": "Distance (m)",
+        "heartrate": "Heart Rate (bpm)",
+        "altitude": "Altitude (m)",
+        "velocity_smooth": "Velocity (m/s)",
+        "cadence": "Cadence (rpm)",
+        "watts": "Power (W)"
     }
 
     fig = go.Figure()
 
-    for metric, (col, metric_label) in metric_map.items():
-        fig.add_trace(go.Scatter(
+    for col, metric_label in metric_map.items():
+        fig.add_trace(go.Line(
             x=df['time'],
             y=df[col],
             name=metric_label,
-            visible=True
         ))
 
     fig.update_layout(
@@ -130,13 +143,52 @@ def summary_metrics(df: pd.DataFrame) -> None:
         st.metric(f"Total Calories Burned", f"{total_calories} kcal")
 
 
+def gen_heart_rate_plot(df: pd.DataFrame) -> None:
+
+    col1, col2 = st.columns([4, 1])
+    data = go.Scatter(
+        x=df['time'],
+        y=df['heartrate'],
+        mode='lines',
+        name='Heart Rate (bpm)',
+        fill='tozeroy',
+        line=dict(color='rgba(0,0,255,0.6)'),
+        fillcolor='rgba(10,10,150,0.3)',
+        marker={'colorscale': 'RdYlGn'}
+    )
+
+    layout = go.Layout(
+        title='Heart Rate vs Time',
+        xaxis=dict(title='Time (seconds)'),
+        yaxis=dict(title='Heart Rate (bpm)'),
+    )
+
+    fig = go.Figure(data, layout)
+
+    for key, val in {"yellow": 120, "orange": 140, "red": 160}.items():
+        fig.add_hline(
+            y=val,
+            line_dash="dash",
+            line_color=key,
+            annotation_text=f"{val} bpm"
+        )
+
+    with col1:
+        st.plotly_chart(fig, width='stretch')
+    col2.metric("Max Heart Rate", f"{df['heartrate'].max():.0f} bpm")
+
+
 if __name__ == '__main__':
     conn = get_engine(ENV)
-    activity_id = st.session_state.get('activity_id')
-    activities_types_streams = join_data(conn, activity_id)
+
+    activity_id = get_id()
+
+    df = join_data(conn, activity_id)
+    df = explode_data(df)
 
     st.title(
-        f"Activity: {activities_types_streams['activity_name'].iloc[0]}     ({activities_types_streams['start_datetime'].iloc[0].strftime('%Y-%m-%d')})")
+        f"Activity: {df['activity_name'].iloc[0]}     ({df['start_datetime'].iloc[0].strftime('%Y-%m-%d')})")
     st.space('small')
-    summary_metrics(activities_types_streams)
-    gen_disttime_plot(activities_types_streams)
+    summary_metrics(df)
+    gen_disttime_plot(df)
+    gen_heart_rate_plot(df)
