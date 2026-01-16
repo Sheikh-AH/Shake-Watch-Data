@@ -1,10 +1,10 @@
 """Extract and process watch data."""
 
 from datetime import datetime
-from os import _Environ
+from os import environ as ENV, _Environ
 
 from requests import get, post
-from dotenv import set_key
+from dotenv import set_key, load_dotenv
 from psycopg2 import connect
 
 
@@ -163,11 +163,17 @@ def extract_data(conn, config: _Environ):
     check_access_token(config)
     activities_basic = get_activities(config)
     activity_ids = get_activity_ids(activities_basic)
-    activity_ids = filter_for_stored_data(conn, activity_ids)
+    # activity_ids = filter_for_stored_data(conn, activity_ids)
     activities_detailed = get_detailed_activities(config, activity_ids)
     streams = get_all_activity_streams(config, activity_ids)
     return activities_detailed, streams
 
 
 if __name__ == '__main__':
-    pass
+    load_dotenv()
+
+    connection = get_connection(ENV)
+    data, streams = extract_data(connection, ENV)
+    connection.close()
+    with open('extracted.txt', 'w') as f:
+        f.write(str(streams[20][1]['time']))
