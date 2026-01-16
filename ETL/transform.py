@@ -1,5 +1,6 @@
 """Process and transform data extracted from the API."""
 
+
 def get_type_mapping(conn) -> dict:
     """Retrieve activity type mapping from the database."""
     cursor = conn.cursor()
@@ -39,10 +40,19 @@ def filter_streams(streams: dict) -> dict:
         "moving",
         "grade_smooth"
     ]
+
     filtered_streams = {}
     for key in streams.keys():
         if key in list_of_streams:
             filtered_streams[key] = streams[key]['data']
+
+    # for data in filtered_streams.values():
+    #     if 0 in data[10:-10]:
+    #         count = data.count(0)
+    #         for c in range(count):
+    #             i = data.index(0)
+    #             data[i] = data[i-1]+data[i+1]/2
+
     return filtered_streams
 
 

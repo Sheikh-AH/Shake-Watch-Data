@@ -4,6 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from os import environ as ENV, _Environ
 from plotly import graph_objects as go, express as px
+from datetime import datetime
 
 load_dotenv()
 
@@ -143,17 +144,35 @@ def summary_metrics(df: pd.DataFrame) -> None:
         st.metric(f"Total Calories Burned", f"{total_calories} kcal")
 
 
+def heart_rate_zones(df: pd.DataFrame) -> dict:
+    max_hr = 220 - datetime.now().year + 2001  # assuming birth year 1990
+    zones = {
+        "Zone 1": (0.5 * max_hr, 0.6 * max_hr),
+        "Zone 2": (0.6 * max_hr, 0.7 * max_hr),
+        "Zone 3": (0.7 * max_hr, 0.8 * max_hr),
+        "Zone 4": (0.8 * max_hr, 0.9 * max_hr),
+        "Zone 5": (0.9 * max_hr, max_hr),
+    }
+    time_in_zones = {}
+    for zone, (lower, upper) in zones.items():
+        time_in_zone = df[(df['heartrate'] >= lower) &
+                          (df['heartrate'] < upper)].shape[0]
+        time_in_zones[zone] = time_in_zone
+    return time_in_zones
+
+
 def gen_heart_rate_plot(df: pd.DataFrame) -> None:
 
-    col1, col2 = st.columns([4, 1])
+    col1, col2, col3 = st.columns(
+        [4, 1, 1], gap='medium', vertical_alignment='center')
     data = go.Scatter(
         x=df['time'],
         y=df['heartrate'],
         mode='lines',
         name='Heart Rate (bpm)',
         fill='tozeroy',
-        line=dict(color='rgba(0,0,255,0.6)'),
-        fillcolor='rgba(10,10,150,0.3)',
+        line=dict(color='rgba(0,120,255,0.6)'),
+        fillcolor='rgba(0,120,255,0.1)',
         marker={'colorscale': 'RdYlGn'}
     )
 
@@ -173,9 +192,32 @@ def gen_heart_rate_plot(df: pd.DataFrame) -> None:
             annotation_text=f"{val} bpm"
         )
 
+    time_in_zones = heart_rate_zones(df)
+    total_time = sum(time_in_zones.values())
+
     with col1:
         st.plotly_chart(fig, width='stretch')
-    col2.metric("Max Heart Rate", f"{df['heartrate'].max():.0f} bpm")
+
+    with col2:
+        st.metric("Max Heart Rate", f"{df['heartrate'].max():.0f} bpm")
+        st.metric("Avg Heart Rate", f"{df['heartrate'].mean():.0f} bpm")
+        st.metric("Var Heart Rate", f"{df['heartrate'].std():.0f} bpm")
+    with col3:
+        for zone in time_in_zones:
+            zone_proportion = time_in_zones[zone] / total_time
+            st.progress(zone_proportion,
+                        text=f"{zone} - {round(zone_proportion*100)}%")
+
+
+def gen_velocity_plot(df: pd.DataFrame) -> None:
+    fig = px.line(
+        df,
+        x='time',
+        y='velocity_smooth',
+        title='Velocity vs Time',
+        labels={'time': 'Time (seconds)', 'velocity_smooth': 'Velocity (m/s)'}
+    )
+    st.plotly_chart(fig, width='stretch')
 
 
 if __name__ == '__main__':
@@ -192,3 +234,4 @@ if __name__ == '__main__':
     summary_metrics(df)
     gen_disttime_plot(df)
     gen_heart_rate_plot(df)
+    gen_velocity_plot(df[['time', 'velocity_smooth']])
