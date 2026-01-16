@@ -13,6 +13,7 @@
 - clean text on run page
 - add badges
 - add heart rate zone progress bars
+- Fix tooltip on graphs
 
 # Misc
 - add records page e.g. longest distance, most sleep etc.
