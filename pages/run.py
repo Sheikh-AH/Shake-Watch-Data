@@ -54,25 +54,16 @@ def join_data(conn, activity_id: int) -> pd.DataFrame:
 
 
 def explode_data(df: pd.DataFrame) -> pd.DataFrame:
+    cols = ['time', 'stream_distance', 'heartrate',
+            'altitude', 'velocity_smooth', 'cadence', 'watts']
 
-    # Explode all array columns
-    df = df.explode(
-        ['time', 'stream_distance', 'heartrate', 'altitude', 'velocity_smooth', 'cadence', 'watts'])
+    df = df.explode(cols)
 
-    # Convert to numeric
-    df['time'] = pd.to_numeric(df['time'], errors='coerce')
-    df['stream_distance'] = pd.to_numeric(
-        df['stream_distance'], errors='coerce')
-    df['heartrate'] = pd.to_numeric(
-        df['heartrate'], errors='coerce')
-    df['altitude'] = pd.to_numeric(
-        df['altitude'], errors='coerce')
-    df['velocity_smooth'] = pd.to_numeric(
-        df['velocity_smooth'], errors='coerce')
-    df['cadence'] = pd.to_numeric(
-        df['cadence'], errors='coerce')
-    df['watts'] = pd.to_numeric(df['watts'], errors='coerce')
+    for col in cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
     return df
+
 
 
 def normalize_values(series: pd.Series) -> pd.Series:
