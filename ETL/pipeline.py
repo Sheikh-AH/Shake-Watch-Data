@@ -8,7 +8,6 @@ from load import upload_activities, upload_streams
 
 def etl_pipeline(conn, config: _Environ):
     """Run the ETL pipeline."""
-    check_access_token(config)
     activities_detailed, streams = extract_data(conn, config)
     clean_activities_data, clean_streams_data = clean_data(
         conn, (activities_detailed, streams))

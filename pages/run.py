@@ -16,7 +16,7 @@ def get_engine(_config: _Environ):
     return create_engine(connection_string)
 
 
-def join_data(conn):
+def join_data(conn, activity_id: int) -> pd.DataFrame:
     query = """
     SELECT
         a.activity_id,
@@ -45,33 +45,34 @@ def join_data(conn):
     FROM activities a
     JOIN activity_types at ON a.activity_type_id = at.activity_type_id
     JOIN stream_sets ss ON a.activity_id = ss.activity_id
+    WHERE a.activity_id = %s
     """
     activities_types_streams = pd.read_sql(
-        query, conn)
+        query, conn, params=(int(activity_id),))
+
     return activities_types_streams
 
 
-def filter_data(df: pd.DataFrame, activity_id: int) -> pd.DataFrame:
-    df_filtered = df[df['activity_id'] == activity_id].copy()
+def explode_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Explode all array columns
-    df_filtered = df_filtered.explode(
+    df = df.explode(
         ['time', 'stream_distance', 'heartrate', 'altitude', 'velocity_smooth', 'cadence', 'watts'])
 
     # Convert to numeric
-    df_filtered['time'] = pd.to_numeric(df_filtered['time'], errors='coerce')
-    df_filtered['stream_distance'] = pd.to_numeric(
-        df_filtered['stream_distance'], errors='coerce')
-    df_filtered['heartrate'] = pd.to_numeric(
-        df_filtered['heartrate'], errors='coerce')
-    df_filtered['altitude'] = pd.to_numeric(
-        df_filtered['altitude'], errors='coerce')
-    df_filtered['velocity_smooth'] = pd.to_numeric(
-        df_filtered['velocity_smooth'], errors='coerce')
-    df_filtered['cadence'] = pd.to_numeric(
-        df_filtered['cadence'], errors='coerce')
-    df_filtered['watts'] = pd.to_numeric(df_filtered['watts'], errors='coerce')
-    return df_filtered
+    df['time'] = pd.to_numeric(df['time'], errors='coerce')
+    df['stream_distance'] = pd.to_numeric(
+        df['stream_distance'], errors='coerce')
+    df['heartrate'] = pd.to_numeric(
+        df['heartrate'], errors='coerce')
+    df['altitude'] = pd.to_numeric(
+        df['altitude'], errors='coerce')
+    df['velocity_smooth'] = pd.to_numeric(
+        df['velocity_smooth'], errors='coerce')
+    df['cadence'] = pd.to_numeric(
+        df['cadence'], errors='coerce')
+    df['watts'] = pd.to_numeric(df['watts'], errors='coerce')
+    return df
 
 
 def normalize_values(series: pd.Series) -> pd.Series:
@@ -87,11 +88,11 @@ def normalize_values(series: pd.Series) -> pd.Series:
     return normalized_series
 
 
-def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
-    df_filtered = filter_data(df, activity_id)
+def gen_disttime_plot(df: pd.DataFrame) -> None:
+    df = explode_data(df)
 
     for col in ['stream_distance', 'heartrate', 'altitude', 'velocity_smooth', 'cadence', 'watts']:
-        df_filtered[col] = normalize_values(df_filtered[col])
+        df[col] = normalize_values(df[col])
 
     metric_map = {
         "Distance": ("stream_distance", "Distance (m)"),
@@ -106,8 +107,8 @@ def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
 
     for metric, (col, metric_label) in metric_map.items():
         fig.add_trace(go.Scatter(
-            x=df_filtered['time'],
-            y=df_filtered[col],
+            x=df['time'],
+            y=df[col],
             name=metric_label,
             visible=True
         ))
@@ -119,17 +120,15 @@ def gen_disttime_plot(df: pd.DataFrame, activity_id: int):
         hovermode='x unified'
     )
 
-    return fig
+    st.plotly_chart(fig, width='stretch')
 
 
 if __name__ == '__main__':
     conn = get_engine(ENV)
-    activities_types_streams = join_data(conn)
-
     activity_id = st.session_state.get('activity_id')
-    filtered_data = activities_types_streams[activities_types_streams['activity_id'] == activity_id]
+    activities_types_streams = join_data(conn, activity_id)
 
-    st.title(f"Activity: {filtered_data['activity_name'].iloc[0]}")
+    st.title(f"Activity: {activities_types_streams['activity_name'].iloc[0]}")
 
-    fig = gen_disttime_plot(activities_types_streams, activity_id)
-    st.plotly_chart(fig, width='stretch')
+    fig = gen_disttime_plot(activities_types_streams)
+    
