@@ -65,7 +65,6 @@ def explode_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-
 def normalize_values(series: pd.Series) -> pd.Series:
     min_val = series.min()
     max_val = series.max()
@@ -120,7 +119,6 @@ def summary_metrics(df: pd.DataFrame) -> None:
     avg_speed = total_distance / (total_time / 60)
     total_calories = df['calories'].iloc[0]
 
-    st.subheader("Summary Stats")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(f"Total Distance", f"{total_distance:.2f} km")
@@ -131,12 +129,14 @@ def summary_metrics(df: pd.DataFrame) -> None:
     with col4:
         st.metric(f"Total Calories Burned", f"{total_calories} kcal")
 
+
 if __name__ == '__main__':
     conn = get_engine(ENV)
     activity_id = st.session_state.get('activity_id')
     activities_types_streams = join_data(conn, activity_id)
 
-    st.title(f"Activity: {activities_types_streams['activity_name'].iloc[0]}")
+    st.title(
+        f"Activity: {activities_types_streams['activity_name'].iloc[0]}     ({activities_types_streams['start_datetime'].iloc[0].strftime('%Y-%m-%d')})")
+    st.space('small')
     summary_metrics(activities_types_streams)
     gen_disttime_plot(activities_types_streams)
-    

@@ -15,4 +15,6 @@
 - remove engine
 - view for graphs activity metrics
 -plot nine
+- add badges to runpage
+
 
