@@ -79,7 +79,11 @@ def get_activities(config: _Environ) -> list[dict]:
     end_point = '/athlete/activities'
     response = get(
         f'{BASE_URL}{end_point}',
-        headers=auth_info, timeout=10
+        headers=auth_info, timeout=10,
+        params = {
+        "per_page": 100,
+        "page": 1
+    }
     ).json()
 
     runs = [activity for activity in response if activity["sport_type"].lower() == "run"]
