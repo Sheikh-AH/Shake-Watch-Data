@@ -27,10 +27,8 @@ def join_data(conn, activity_id: int) -> pd.DataFrame:
         a.moving_time,
         a.elapsed_time,
         a.total_elevation_gain,
-        a.activity_type_id,
         a.start_datetime,
         a.start_loc,
-        at.activity_type_name,
         ss.stream_sets_id,
         ss.time,
         ss.distance as stream_distance,
@@ -44,14 +42,13 @@ def join_data(conn, activity_id: int) -> pd.DataFrame:
         ss.moving,
         ss.grade_smooth
     FROM activities a
-    JOIN activity_types at ON a.activity_type_id = at.activity_type_id
     JOIN stream_sets ss ON a.activity_id = ss.activity_id
     WHERE a.activity_id = %s
     """
-    activities_types_streams = pd.read_sql(
+    activities_streams = pd.read_sql(
         query, conn, params=(int(activity_id),))
 
-    return activities_types_streams
+    return activities_streams
 
 
 def explode_data(df: pd.DataFrame) -> pd.DataFrame:
