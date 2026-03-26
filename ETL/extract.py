@@ -1,5 +1,6 @@
 """Extract and process watch data."""
 
+import json
 from datetime import datetime
 from os import environ as ENV, _Environ
 
@@ -56,7 +57,8 @@ def check_access_token(config: _Environ) -> None:
         set_key('.env', "EXPIRES_AT", str(response['expires_at']))
         set_key('.env', "REFRESH_TOKEN", response['refresh_token'])
         print('Token Updated')
-    print('Token Valid')
+    else:
+        print('Token Valid')
 
 
 def get_stats(config: _Environ) -> dict:
@@ -80,7 +82,8 @@ def get_activities(config: _Environ) -> list[dict]:
         headers=auth_info, timeout=10
     ).json()
 
-    return response
+    runs = [activity for activity in response if activity["sport_type"].lower() == "run"]
+    return runs
 
 
 def get_activity_ids(activities: list[dict]) -> list[int]:
@@ -114,12 +117,12 @@ def get_activity_info(config: _Environ, activity_id: int) -> list[dict]:
     return response
 
 
-def get_detailed_activities(config: _Environ, activity_ids: list[dict]):
+def get_detailed_activities(config: _Environ, activity_ids: list[int]):
     """Get detailed activity information from id."""
     return [get_activity_info(config, activity_id) for activity_id in activity_ids]
 
 
-def get_activity_streams(config: _Environ, activity_id: int) -> list[dict]:
+def get_activity_streams(config: _Environ, activity_id: int) -> tuple:
     """Get a list of activities."""
 
     streams = ",".join([
@@ -153,7 +156,7 @@ def get_activity_streams(config: _Environ, activity_id: int) -> list[dict]:
     return (activity_id, response)
 
 
-def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[dict]:
+def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[tuple]:
     """Get all activity streams from a list of activity ids."""
     return [get_activity_streams(config, activity_id) for activity_id in activity_ids]
 
@@ -163,7 +166,7 @@ def extract_data(conn, config: _Environ):
     check_access_token(config)
     activities_basic = get_activities(config)
     activity_ids = get_activity_ids(activities_basic)
-    # activity_ids = filter_for_stored_data(conn, activity_ids)
+    activity_ids = filter_for_stored_data(conn, activity_ids)
     activities_detailed = get_detailed_activities(config, activity_ids)
     streams = get_all_activity_streams(config, activity_ids)
     return activities_detailed, streams
@@ -171,9 +174,12 @@ def extract_data(conn, config: _Environ):
 
 if __name__ == '__main__':
     load_dotenv()
+    check_access_token(ENV)
 
-    connection = get_connection(ENV)
-    data, streams = extract_data(connection, ENV)
-    connection.close()
-    with open('extracted.txt', 'w') as f:
-        f.write(str(streams[20][1]['time']))
+    # connection = get_connection(ENV)
+    # data, streams = extract_data(connection, ENV)
+    # connection.close()
+
+    # all_activities = get_activities(ENV)
+    # with open('extracted.json', 'w') as f:
+    #     json.dump(all_activities, f)
