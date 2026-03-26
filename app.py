@@ -6,7 +6,6 @@ st.set_page_config(page_title="Watch Data Dashboard", layout="wide")
 
 pages = [
     st.Page("pages/activitylog.py", title="Activity Log", icon="📋"),
-    st.Page("pages/health.py", title="Health Log", icon="❤️"),
     st.Page("pages/run.py", title="Run Details", icon="🏃‍♂️")
 ]
 
