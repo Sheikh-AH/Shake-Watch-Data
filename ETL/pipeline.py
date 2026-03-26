@@ -1,7 +1,7 @@
 """Gather all ETL pipeline components."""
 from os import environ as ENV, _Environ
 from dotenv import load_dotenv
-from extract import extract_data, get_connection, check_access_token
+from extract import extract_data, get_connection
 from transform import clean_data
 from load import upload_activities, upload_streams
 
