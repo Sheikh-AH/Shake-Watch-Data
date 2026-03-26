@@ -42,7 +42,7 @@ def get_activities_data(conn) -> pd.DataFrame:
     return df
 
 
-def activity_log_page(config: _Environ):
+def gen_activity_log_page(config: _Environ):
     st.title("Activity Log")
     conn = get_engine(config)
     df = get_activities_data(conn)
@@ -98,10 +98,21 @@ def activity_log_page(config: _Environ):
         st.switch_page("pages/run.py")
 
 
+def gen_athlete_records():
+    st.title('Athlete Records')
+
 if __name__ == "__main__":
     
     load_dotenv()
 
-    activity_log_page(ENV)
+    col1, col2 = st.columns([0.75,0.25])
+
+    with col1:
+        gen_activity_log_page(ENV)
+
+    st.space('medium')
+
+    gen_athlete_records()
+
 
     
