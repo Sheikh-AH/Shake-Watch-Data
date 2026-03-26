@@ -2,3 +2,8 @@
 .env
 watch_data
 *.sh
+
+**/__pycache__/
+
+.pyc
+
