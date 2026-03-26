@@ -24,76 +24,84 @@ def get_dataframes(conn):
     return activities_df, activity_types_df, stream_sets_df
 
 
-def get_activities_data(conn):
-    """Join all data into a single dataframe."""
+def get_activities_data(conn) -> pd.DataFrame:
+    """Join data for activity log."""
     query = """
     SELECT 
         a.start_datetime,
         a.calories,
-        a.elapsed_time,
+        a.moving_time,
         a.activity_id,
         a.activity_name,
-        at.activity_type_name
+        a.effort,
+        a.pace
     FROM activities a
-    JOIN activity_types at USING (activity_type_id);
     """
-    activities_types_streams = pd.read_sql(query, conn)
-    activities_types_streams = activities_types_streams.loc[:,
-                                                            ~activities_types_streams.columns.duplicated()]
-    return activities_types_streams
+    activities_data = pd.read_sql(query, conn)
+    df = activities_data.sort_values(by='start_datetime', ascending=False)
+    return df
 
 
 def activity_log_page(config: _Environ):
     st.title("Activity Log")
     conn = get_engine(config)
-    activities_types_streams = get_activities_data(conn)
-    df = activities_types_streams[['start_datetime', 'activity_name',
-                                  'activity_type_name', 'calories', 'elapsed_time', 'activity_id']].sort_values(by='start_datetime', ascending=False)
+    df = get_activities_data(conn)
     event = st.dataframe(
         df,
         column_config={
             'start_datetime': st.column_config.DateColumn(
-                "Started At",
+                label="Started At",
                 help="The date and time when the activity started.",
                 format="YYYY-MM-DD HH:mm:ss",
+                width="medium"
             ),
             'activity_name': st.column_config.TextColumn(
-                "Activity Label",
+                label="Activity Label",
                 help="The label given to the activity.",
+                width="medium"
             ),
-            'activity_type_name': st.column_config.TextColumn(
-                "Type",
-                help="The type of activity performed.",
+            'effort': st.column_config.NumberColumn(
+                label="Effort",
+                help="Effort of run",
+                format="%d",
+                width="small"
             ),
             'calories': st.column_config.NumberColumn(
-                "Calories Burned",
+                label="Calories Burned",
                 help="Total calories burned during the activity.",
                 format="%d kcal",
+                width="small"
             ),
-            'elapsed_time': st.column_config.NumberColumn(
-                "Elapsed Time",
-                help="Total elapsed time of the activity in seconds.",
+            'moving_time': st.column_config.NumberColumn(
+                label="Duration",
+                help="Total running time of the activity in seconds.",
                 format="%d sec",
+                width="small"
+            ),
+            'pace': st.column_config.NumberColumn(
+                label="Pace",
+                help="Average pace for run in m/s",
+                format="%d m/s",
+                width="small"
             ),
             'activity_id': None,
         },
+        column_order=('start_datetime','activity_name','effort','calories','moving_time','pace'),
         on_select="rerun",
         selection_mode="single-row",
         hide_index=True,
-
     )
 
-    if event.selection.rows:
-        selected_row = df.iloc[event.selection.rows[0]]
-
-        if selected_row['activity_type_name'] == 'Run':
-            st.session_state['activity_id'] = selected_row['activity_id']
-            st.switch_page("pages/run.py")
-        else:
-            st.warning("Details only available for runs")
+    if event.selection.rows: # type: ignore
+        selected_row = df.iloc[event.selection.rows[0]] # type: ignore
+        st.session_state['activity_id'] = selected_row['activity_id']
+        st.switch_page("pages/run.py")
 
 
 if __name__ == "__main__":
-
+    
     load_dotenv()
+
     activity_log_page(ENV)
+
+    
