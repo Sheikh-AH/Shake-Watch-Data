@@ -42,10 +42,9 @@ def get_activities_data(conn) -> pd.DataFrame:
     return df
 
 
-def gen_activity_log_page(config: _Environ):
+def gen_activity_log_page(df:pd.DataFrame):
     st.title("Activity Log")
-    conn = get_engine(config)
-    df = get_activities_data(conn)
+    
     event = st.dataframe(
         df,
         column_config={
@@ -81,7 +80,7 @@ def gen_activity_log_page(config: _Environ):
             'pace': st.column_config.NumberColumn(
                 label="Pace",
                 help="Average pace for run in m/s",
-                format="%d m/s",
+                format="%.2f m/s",
                 width="small"
             ),
             'activity_id': None,
@@ -98,17 +97,39 @@ def gen_activity_log_page(config: _Environ):
         st.switch_page("pages/run.py")
 
 
+def get_last5_data(df):
+    last5_data = df.sort_values(by='start_datetime', ascending = False).head(5)['activity_id']
+    st.text(last5_data)
+
+
+def gen_summary(df):
+    l5tab, monthtab = st.tabs(['Last 5','Last Month'])
+
+    with l5tab:
+        st.header('Last 5 runs.')
+        get_last5_data(df)
+    
+    with monthtab:
+        st.header('Monthly')
+
+
 def gen_athlete_records():
     st.title('Athlete Records')
+
 
 if __name__ == "__main__":
     
     load_dotenv()
+    conn = get_engine(ENV)
+    df = get_activities_data(conn)
 
-    col1, col2 = st.columns([0.75,0.25])
+    col1, col3, col2 = st.columns([0.70,0.05,0.25])
 
     with col1:
-        gen_activity_log_page(ENV)
+        gen_activity_log_page(df)
+
+    with col2:
+        gen_summary(df)
 
     st.space('medium')
 

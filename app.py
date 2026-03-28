@@ -1,4 +1,4 @@
-"""Starting point for the Streamlit Watch Data Dashboard application."""
+"""Entry point for the Streamlit Watch Data Dashboard application."""
 
 import streamlit as st
 
