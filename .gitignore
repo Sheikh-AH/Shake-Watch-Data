@@ -7,3 +7,5 @@ watch_data
 
 .pyc
 
+.json
+athlete_data.json
