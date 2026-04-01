@@ -80,9 +80,9 @@ def get_records_values(conn, update_check = True) -> dict:
     records['avg_vel'] = round(float(velocity.mean()), 2)
     records['avg_cadence'] = int(cadence.mean())
     records['avg_power'] = int(power.mean())
-    records['max_time'] = int(get_stream_field_data(conn, 'time', max_only=True))
-    records['max_dist'] = int(get_stream_field_data(conn, 'distance', max_only=True))
-    records['max_altitude'] = int(get_stream_field_data(conn, 'altitude', max_only=True))
+    records['max_time'] = int(get_stream_field_data(conn, 'time', max_only=True, update=update_check))
+    records['max_dist'] = int(get_stream_field_data(conn, 'distance', max_only=True, update=update_check))
+    records['max_altitude'] = int(get_stream_field_data(conn, 'altitude', max_only=True, update=update_check))
     records['last_updated'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return records
 
@@ -112,7 +112,7 @@ def compare_data(current:dict, new:dict) -> dict:
         
 def update_records(conn):
     """Update/Create athlete data file."""
-    if path.isfile('./athlete_data.json'):
+    if path.exists('athlete_data.json'):
         with open('athlete_data.json','r') as f:
             current_data = load(f)
         new_data = get_records_values(conn, update_check=True)
@@ -125,4 +125,4 @@ if __name__ == '__main__':
     load_dotenv()
     conn = get_engine(ENV)
 
-    # update_records(conn)
+    update_records(conn)
