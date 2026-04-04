@@ -81,6 +81,26 @@ def gen_summary(df):
 
 def gen_athlete_records():
     st.title('Athlete Records')
+    with open('records_table.html') as f:
+        html = f.read()
+        
+    values = {
+        '{{max1kmPace}}': 'value1 m/s',
+        '{{max5kmPace}}': 'value2 m/s',
+        '{{maxPace}}': 'value3 m/s',
+        '{{avgPace}}': 'value4 m/s',
+        '{{maxHeartrate}}': 'value5 bpm',
+        '{{avgHearate}}': 'value6 bpm',
+        '{{maxDistance}}': 'value7 km',
+        '{{maxAltitude}}': 'value8 m',
+        '{{avgPower}}': 'value9 W',
+        '{{avgCadence}}': 'value10 rpm',
+    }
+    
+    for placeholder, value in values.items():
+        html = html.replace(placeholder, str(value))
+    
+    st.markdown(html, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
@@ -88,6 +108,7 @@ if __name__ == "__main__":
     load_dotenv()
     conn = get_engine(ENV)
     df = get_activities_data(conn)
+    st.markdown('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">', unsafe_allow_html=True)
 
     col1, col3, col2 = st.columns([0.70,0.05,0.25])
 
