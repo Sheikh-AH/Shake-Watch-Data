@@ -52,7 +52,7 @@ def get_stream_field_data(conn, field:str, max_only:bool = False, update:bool = 
         with open('athlete_data.json','r') as f:
             data = load(f)
             last_updated = data['last_updated']
-        query = f"SELECT {field} FROM stream_sets JOIN activities USING (activity_id) WHERE start_datetime > '{last_updated}'"
+        query = f"SELECT ss.{field} FROM stream_sets AS ss JOIN activities USING (activity_id) WHERE start_datetime > '{last_updated}'"
     
     df = pd.read_sql(query, conn).dropna()
     if df.empty:
@@ -90,6 +90,7 @@ def write_records_to_file(vals:dict):
     """Update the athlete record stats json file with new values"""
     with open('athlete_data.json', 'w') as f:
         dump(vals, f)
+    print('Records have been updated.')
 
 def compare_data(current:dict, new:dict) -> dict:
     """Compare new and old record data."""
