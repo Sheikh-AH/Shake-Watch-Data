@@ -1,24 +1,10 @@
 # Shake-Watch-Data
 
-
-<!-- to do -->
-
-# Data
-- clean streams for spikes
-- add batch data uploads
-- Add health data
-
-# Run Page Features
-- Add single metric graphs
-- clean text on run page
-- add badges
-- add heart rate zone progress bars
-- Fix tooltip on graphs
-
-# Misc
-- add records page e.g. longest distance, most sleep etc.
-- remove engine
-- view for graphs activity metrics
-- plot nine
-
-
+Add update button to log page
+Add effort values calculation
+add effort values to pipeline and db
+complete log page summary
+complete achievements section
+complete records sections
+add badges to runs
+add more graphs to runs

@@ -7,6 +7,13 @@ import streamlit as st
 
 from tool import get_engine, get_activities_data
 
+def loading_and_prerequisites() -> tuple:
+    load_dotenv()
+    conn = get_engine(ENV)
+    df = get_activities_data(conn)
+    st.markdown('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">', unsafe_allow_html=True)
+    
+    return conn, df
 
 def gen_activity_log_page(df:pd.DataFrame):
     st.title("Activity Log")
@@ -80,17 +87,16 @@ def gen_summary(df):
 
 
 def gen_athlete_records():
-    st.title('Athlete Records')
     with open('records_table.html') as f:
         html = f.read()
-        
+
     values = {
         '{{max1kmPace}}': 'value1 m/s',
         '{{max5kmPace}}': 'value2 m/s',
         '{{maxPace}}': 'value3 m/s',
         '{{avgPace}}': 'value4 m/s',
         '{{maxHeartrate}}': 'value5 bpm',
-        '{{avgHearate}}': 'value6 bpm',
+        '{{avgHeartrate}}': 'value6 bpm',
         '{{maxDistance}}': 'value7 km',
         '{{maxAltitude}}': 'value8 m',
         '{{avgPower}}': 'value9 W',
@@ -100,27 +106,37 @@ def gen_athlete_records():
     for placeholder, value in values.items():
         html = html.replace(placeholder, str(value))
     
-    st.markdown(html, unsafe_allow_html=True)
+    st.html(html)
 
 
 if __name__ == "__main__":
     
-    load_dotenv()
-    conn = get_engine(ENV)
-    df = get_activities_data(conn)
-    st.markdown('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">', unsafe_allow_html=True)
+    conn, df = loading_and_prerequisites()
+    listOfAchievements = ['aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
+                          'aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
+                          'aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',]
 
-    col1, col3, col2 = st.columns([0.70,0.05,0.25])
-
-    with col1:
+    colLog, spacer, colSummary = st.columns([0.70,0.025,0.275])
+    with colLog:
         gen_activity_log_page(df)
-
-    with col2:
+    with colSummary:
         gen_summary(df)
 
-    st.space('medium')
+    st.space('small')
 
-    gen_athlete_records()
+    st.title('Athlete Records')
+    colRecords, spacer, colAchievements = st.columns([0.5, 0.025,0.475])
+    with colRecords:
+        gen_athlete_records()
+    with colAchievements:
+        with st.container(border=True, gap='small', height=450):
+            acheivements = st.container()
+            for achievement in listOfAchievements:
+                st.html(f'''
+                    <div style="background-color: #52b399; border-radius: 10px; border: 2px solid #44ab46; padding: 10px;">
+                        <p style="color: #000000; margin: 0;">{achievement}</p>
+                    </div>
+                ''')
 
 
     
