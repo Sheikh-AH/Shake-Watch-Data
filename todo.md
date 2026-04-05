@@ -1,5 +1,6 @@
 # Shake-Watch-Data
 
+add total distance to stats
 Add update button to log page
 Add effort values calculation
 add effort values to pipeline and db
