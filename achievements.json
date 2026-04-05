@@ -1,0 +1,248 @@
+{
+  "faster_1km_avg": {
+    "metric": "1km",
+    "threshold": 382,
+    "display_text": "You are now faster than the average runner over 1km (6:22 min/km)!",
+    "achieved": false
+  },
+  "faster_5km_avg": {
+    "metric": "5km",
+    "threshold": 1980,
+    "display_text": "You are now faster than the average runner over 5km (33 min/km)!",
+    "achieved": false
+  },
+  "pace_5_30": {
+    "metric": "avg_pace",
+    "threshold": 330,
+    "display_text": "You've breached the 5:30 min/km mark!",
+    "achieved": false
+  },
+  "pace_5_00": {
+    "metric": "avg_pace",
+    "threshold": 300,
+    "display_text": "You've breached the 5:00 min/km mark!",
+    "achieved": false
+  },
+  "pace_4_30": {
+    "metric": "avg_pace",
+    "threshold": 270,
+    "display_text": "You've breached the 4:30 min/km mark!",
+    "achieved": false
+  },
+  "pace_4_00": {
+    "metric": "avg_pace",
+    "threshold": 240,
+    "display_text": "You've breached the 4:00 min/km mark!",
+    "achieved": false
+  },
+  "pace_6_00": {
+    "metric": "avg_pace",
+    "threshold": 360,
+    "display_text": "You've breached the 6:00 min/km mark!",
+    "achieved": false
+  },
+  "max_pace_100m_wr": {
+    "metric": "max_pace",
+    "threshold": 10.4,
+    "display_text": "Your max_pace is fast enough to beat the 100m world record (10.4 m/s)!",
+    "achieved": false
+  },
+  "max_pace_1000m_wr": {
+    "metric": "max_pace",
+    "threshold": 7.57,
+    "display_text": "Your max_pace is fast enough to beat the 1000m world record (7.57 m/s)!",
+    "achieved": false
+  },
+  "max_pace_5000m_wr": {
+    "metric": "max_pace",
+    "threshold": 6.6,
+    "display_text": "Your max_pace is fast enough to beat the 5000m world record (6.6 m/s)!",
+    "achieved": false
+  },
+  "first_run": {
+    "metric": "run_count",
+    "threshold": 1,
+    "display_text": "You've recorded your first run!",
+    "achieved": false
+  },
+  "tenth_run": {
+    "metric": "run_count",
+    "threshold": 10,
+    "display_text": "You've recorded your 10th run!",
+    "achieved": false
+  },
+  "fiftieth_run": {
+    "metric": "run_count",
+    "threshold": 50,
+    "display_text": "You've recorded your 50th run!",
+    "achieved": false
+  },
+  "hundredth_run": {
+    "metric": "run_count",
+    "threshold": 100,
+    "display_text": "You've recorded your 100th run!",
+    "achieved": false
+  },
+  "1hour_time": {
+    "metric": "time",
+    "threshold": 3600,
+    "display_text": "You've spent 1 hour running!",
+    "achieved": false
+  },
+  "10hour_time": {
+    "metric": "time",
+    "threshold": 36000,
+    "display_text": "You've spent 10 hours running!",
+    "achieved": false
+  },
+  "25hour_time": {
+    "metric": "time",
+    "threshold": 90000,
+    "display_text": "You've spent 25 hours running!",
+    "achieved": false
+  },
+  "50hour_time": {
+    "metric": "time",
+    "threshold": 180000,
+    "display_text": "You've spent 50 hours running!",
+    "achieved": false
+  },
+  "100hour_time": {
+    "metric": "time",
+    "threshold": 360000,
+    "display_text": "You've spent 100 hours running!",
+    "achieved": false
+  },
+  "200hour_time": {
+    "metric": "time",
+    "threshold": 720000,
+    "display_text": "You've spent 200 hours running!",
+    "achieved": false
+  },
+  "500hour_time": {
+    "metric": "time",
+    "threshold": 1800000,
+    "display_text": "You've spent 500 hours running!",
+    "achieved": false
+  },
+  "10km_distance": {
+    "metric": "distance",
+    "threshold": 10,
+    "display_text": "You've run for a total distance of 10km!",
+    "achieved": false
+  },
+  "50km_distance": {
+    "metric": "distance",
+    "threshold": 50,
+    "display_text": "You've run for a total distance of 50km!",
+    "achieved": false
+  },
+  "100km_distance": {
+    "metric": "distance",
+    "threshold": 100,
+    "display_text": "You've run for a total distance of 100km!",
+    "achieved": false
+  },
+  "250km_distance": {
+    "metric": "distance",
+    "threshold": 250,
+    "display_text": "You've run for a total distance of 250km!",
+    "achieved": false
+  },
+  "500km_distance": {
+    "metric": "distance",
+    "threshold": 500,
+    "display_text": "You've run for a total distance of 500km!",
+    "achieved": false
+  },
+  "1000km_distance": {
+    "metric": "distance",
+    "threshold": 1000,
+    "display_text": "You've run for a total distance of 1000km!",
+    "achieved": false
+  },
+  "allegro_cadence": {
+    "metric": "cadence",
+    "threshold": [120, 156],
+    "display_text": "Your average cadence is at an Allegro tempo (120-156 steps/min)!",
+    "achieved": false
+  },
+  "vivace_cadence": {
+    "metric": "cadence",
+    "threshold": [156, 176],
+    "display_text": "Your average cadence is at a Vivace tempo (156-176 steps/min)!",
+    "achieved": false
+  },
+  "presto_cadence": {
+    "metric": "cadence",
+    "threshold": [168, 177],
+    "display_text": "Your average cadence is at a Presto tempo (168-177 steps/min)!",
+    "achieved": false
+  },
+  "prestissimo_cadence": {
+    "metric": "cadence",
+    "threshold": [178, null],
+    "display_text": "Your average cadence is at a Prestissimo tempo (178+ steps/min)!",
+    "achieved": false
+  },
+  "allegro_heartrate": {
+    "metric": "heartrate",
+    "threshold": [120, 156],
+    "display_text": "Your max heart rate is at an Allegro tempo (120-156 BPM)!",
+    "achieved": false
+  },
+  "vivace_heartrate": {
+    "metric": "heartrate",
+    "threshold": [156, 176],
+    "display_text": "Your max heart rate is at a Vivace tempo (156-176 BPM)!",
+    "achieved": false
+  },
+  "presto_heartrate": {
+    "metric": "heartrate",
+    "threshold": [168, 177],
+    "display_text": "Your max heart rate is at a Presto tempo (168-177 BPM)!",
+    "achieved": false
+  },
+  "prestissimo_heartrate": {
+    "metric": "heartrate",
+    "threshold": [178, null],
+    "display_text": "Your max heart rate is at a Prestissimo tempo (178+ BPM)!",
+    "achieved": false
+  },
+  "led_tv_power": {
+    "metric": "power",
+    "threshold": 228,
+    "display_text": "Your average power is enough to power an 82\" LED TV (228W)!",
+    "achieved": false
+  },
+  "dehumidifier_power": {
+    "metric": "power",
+    "threshold": 240,
+    "display_text": "Your average power is enough to power a small dehumidifier (240W)!",
+    "achieved": false
+  },
+  "blanket_power": {
+    "metric": "power",
+    "threshold": 200,
+    "display_text": "Your average power is enough to power an electric blanket (200W)!",
+    "achieved": false
+  },
+  "blender_power": {
+    "metric": "power",
+    "threshold": 300,
+    "display_text": "Your average power is enough to power an food blender (300W)!",
+    "achieved": false
+  },
+  "ps5_power": {
+    "metric": "power",
+    "threshold": 160,
+    "display_text": "Your average power is enough to power a PS5 (160W)!",
+    "achieved": false
+  },
+  "power_tool_power": {
+    "metric": "power",
+    "threshold": 400,
+    "display_text": "Your average power is enough to power a small power tool (400W+)!",
+    "achieved": false
+  }
+}
