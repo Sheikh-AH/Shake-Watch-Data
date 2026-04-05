@@ -67,6 +67,29 @@ def get_stream_field_data(conn, field:str, max_only:bool = False, update:bool = 
 
     return vals
 
+def get_total_records(conn, update = True) -> tuple:
+    """Get the total distance, time and count of runs."""
+    if not update:
+        query = 'SELECT ss.time, ss.distance FROM stream_sets AS ss'
+    else:
+        with open('athlete_data.json','r') as f:
+            data = load(f)
+            last_updated = data['last_updated']
+        query = "SELECT ss.time, ss.distance FROM streams_sets AS ss JOIN activities USING (activity_id) WHERE start_datetime > '{last_updated}'"
+    
+    df = pd.read_sql(query, conn).dropna()
+    if df.empty:
+        raise Exception('No new data found.')
+    
+    time_vals = np.array([max(row) for row in df['time']])
+    dist_vals = np.array([max(row) for row in df['distance']])
+    run_count = len(time_vals)
+    total_time = sum(time_vals)
+    total_dist = sum(dist_vals)
+
+    return run_count, total_time, total_dist
+
+
 def get_records_values(conn, update_check = True) -> dict:
     """Get values for the athlete record stats"""
     records = {}
@@ -74,6 +97,7 @@ def get_records_values(conn, update_check = True) -> dict:
     velocity = get_stream_field_data(conn, 'velocity_smooth', update = update_check)
     cadence = get_stream_field_data(conn, 'cadence', update = update_check)
     power = get_stream_field_data(conn, 'watts', update = update_check)
+    run_count, total_time, total_distance = get_total_records(conn, update = update_check)
     records['max_hr'] = int(heartrate.max())
     records['avg_hr'] = int(heartrate.mean())
     records['max_vel'] = round(float(velocity.max()), 2)
@@ -84,6 +108,9 @@ def get_records_values(conn, update_check = True) -> dict:
     records['max_dist'] = int(get_stream_field_data(conn, 'distance', max_only=True, update=update_check))
     records['max_altitude'] = int(get_stream_field_data(conn, 'altitude', max_only=True, update=update_check))
     records['last_updated'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    records['run_count'] = int(run_count)
+    records['total_time'] = int(total_time)
+    records['total_distance'] = int(total_distance)
     return records
 
 def write_records_to_file(vals:dict):
@@ -97,6 +124,7 @@ def compare_data(current:dict, new:dict) -> dict:
     updated = current.copy()
     max_keys = ('max_hr', 'max_vel', 'max_time', 'max_dist', 'max_altitude')
     avg_keys = ('avg_hr','avg_vel','avg_cadence','avg_power')
+    total_keys = ('run_count', 'total_time', 'total_distance')
 
     for key in max_keys:
         if key in new and new[key] is not None:
@@ -106,6 +134,10 @@ def compare_data(current:dict, new:dict) -> dict:
     for key in avg_keys:
         if key in new and new[key] is not None:
             updated[key] = (current[key] + new[key])/2
+
+    for key in total_keys:
+        if key in new and new[key] is not None:
+            updated[key] += key
 
     updated['last_updated'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     

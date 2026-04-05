@@ -5,7 +5,6 @@ watch_data
 
 **/__pycache__/
 
-.pyc
+*.pyc
 
-.json
 athlete_data.json
