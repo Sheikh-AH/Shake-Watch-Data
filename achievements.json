@@ -56,7 +56,7 @@
   "max_pace_5000m_wr": {
     "metric": "max_pace",
     "threshold": 6.6,
-    "display_text": "Your max_pace is fast enough to beat the 5000m world record (6.6 m/s)!",
+    "display_text": "Your max_pace is fast enough to beat the 5000m world record (6.60 m/s)!",
     "achieved": false
   },
   "first_run": {

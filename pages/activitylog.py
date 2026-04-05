@@ -91,6 +91,7 @@ def gen_athlete_records():
         html = f.read()
 
     values = {
+        '{{run_count}}': 'value1 m/s',
         '{{max1kmPace}}': 'value1 m/s',
         '{{max5kmPace}}': 'value2 m/s',
         '{{maxPace}}': 'value3 m/s',
