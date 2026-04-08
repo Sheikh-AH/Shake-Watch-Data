@@ -19,7 +19,9 @@ CREATE TABLE activities (
     start_datetime TIMESTAMP, --start_date_local in api data
     start_loc NUMERIC[], --start_latlng in api data
     effort INT,
-    pace NUMERIC
+    pace NUMERIC,
+    speeds_1k NUMERIC[],
+    speeds_5k NUMERIC[]
 );
 
 CREATE TABLE stream_sets (
