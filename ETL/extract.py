@@ -57,6 +57,7 @@ def check_access_token(config: _Environ) -> None:
         set_key('.env', "EXPIRES_AT", str(response['expires_at']))
         set_key('.env', "REFRESH_TOKEN", response['refresh_token'])
         print('Token Updated')
+        load_dotenv()
     else:
         print('Token Valid')
 
@@ -165,12 +166,13 @@ def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[
     return [get_activity_streams(config, activity_id) for activity_id in activity_ids]
 
 
-def extract_data(conn, config: _Environ):
+def extract_data(conn, config: _Environ, update_check=True):
     """Main function to extract data."""
     check_access_token(config)
     activities_basic = get_activities(config)
     activity_ids = get_activity_ids(activities_basic)
-    activity_ids = filter_for_stored_data(conn, activity_ids)
+    if update_check:
+        activity_ids = filter_for_stored_data(conn, activity_ids)
     activities_detailed = get_detailed_activities(config, activity_ids)
     streams = get_all_activity_streams(config, activity_ids)
     return activities_detailed, streams
