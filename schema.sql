@@ -20,8 +20,8 @@ CREATE TABLE activities (
     start_loc NUMERIC[], --start_latlng in api data
     effort INT,
     pace NUMERIC,
-    speeds_1k NUMERIC[],
-    speeds_5k NUMERIC[]
+    pace_1k NUMERIC[],
+    pace_5k NUMERIC[]
 );
 
 CREATE TABLE stream_sets (
