@@ -8,3 +8,5 @@ watch_data
 *.pyc
 
 athlete_data.json
+ETL/example_activity.json
+ETL/example_stream.json
