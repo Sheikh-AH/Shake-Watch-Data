@@ -35,8 +35,8 @@ def upload_activities(conn, activities: list[dict]):
                 activity['start_latlng'],
                 activity['effort'],
                 activity['average_speed'],
-                activity.get('1k_pace',[0]),
-                activity.get('5k_pace',[0])
+                activity.get('1k_pace',[9999]),
+                activity.get('5k_pace',[9999])
             )
         )
         print('Run uploaded.')

@@ -64,20 +64,28 @@ def enrich_with_speeds(streams_data:list, activities_data: list) -> list[tuple]:
 
         if max_dist >= 1:
             k1_pace = []
+            prev_time,prev_dist = 0,0
             for j in range(1,max_dist+1):
                 ind = find_first_index(distance_data, j*1000)
-                mins = time_data[ind]/60
-                dist = distance_data[ind]/1000
+                curr_time = time_data[ind]
+                curr_dist = distance_data[ind]
+                mins = (curr_time-prev_time)/60
+                dist = (curr_dist-prev_dist)/1000
                 k1_pace.append(mins/dist)
+                prev_time,prev_dist = curr_time, curr_dist
             activities_data[i]['1k_pace'] = k1_pace
 
         if max_dist >= 5:
             k5_pace = []
+            prev_time,prev_dist = 0,0
             for k in range(5,max_dist+1,5):
                 ind = find_first_index(distance_data, k*1000)
-                mins = time_data[ind]/60
-                dist = distance_data[ind]/1000
+                curr_time = time_data[ind]
+                curr_dist = distance_data[ind]
+                mins = (curr_time-prev_time)/60
+                dist = (curr_dist-prev_dist)/1000
                 k5_pace.append(mins/dist)
+                prev_time,prev_dist = curr_time, curr_dist
             activities_data[i]['5k_pace'] = k5_pace
 
     return activities_data
@@ -85,8 +93,10 @@ def enrich_with_speeds(streams_data:list, activities_data: list) -> list[tuple]:
 def clean_data(data: tuple) -> tuple:
     """Main function to clean and transform data."""
     activities_detailed, streams = data[0], data[1]
+    print('Filtering.')
     filtered_activities_data = filter_activities_data(activities_detailed)
     filtered_streams_data = filer_all_streams(streams)
+    print('Enriching.')
     enriched_activities = enrich_with_speeds(filtered_streams_data, filtered_activities_data)
     return enriched_activities, filtered_streams_data
 
