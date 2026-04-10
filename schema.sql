@@ -19,7 +19,7 @@ CREATE TABLE activities (
     start_datetime TIMESTAMP, --start_date_local in api data
     start_loc NUMERIC[], --start_latlng in api data
     effort INT,
-    pace NUMERIC,
+    avg_pace NUMERIC,
     pace_1k NUMERIC[],
     pace_5k NUMERIC[]
 );
