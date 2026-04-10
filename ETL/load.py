@@ -18,9 +18,9 @@ def upload_activities(conn, activities: list[dict]):
                 start_datetime,
                 start_loc,
                 effort,
-                pace,
-                speeds_1k,
-                speeds_5k
+                avg_pace,
+                pace_1k,
+                pace_5k
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
             """,
             (
@@ -35,10 +35,11 @@ def upload_activities(conn, activities: list[dict]):
                 activity['start_latlng'],
                 activity['effort'],
                 activity['average_speed'],
-                activity['1k_speed'],
-                activity['5k_speed']
+                activity.get('1k_pace',[0]),
+                activity.get('5k_pace',[0])
             )
         )
+        print('Run uploaded.')
     conn.commit()
     cursor.close()
 

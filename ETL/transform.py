@@ -2,6 +2,7 @@
 
 from dotenv import load_dotenv
 from os import environ as ENV
+import json
 
 from extract import extract_data, get_connection
 
@@ -53,46 +54,55 @@ def find_first_index(stream_field, threshold):
     return -1
 
 
-def enrich_with_speeds(streams_data:list[tuple]) -> list[tuple]:
+def enrich_with_speeds(streams_data:list, activities_data: list) -> list[tuple]:
     """Calculate speed data for each 1k and 5k."""
 
-    for stream in streams_data:
+    for i, stream in enumerate(streams_data):
         time_data = stream[1]['time']
         distance_data = stream[1]['distance']
         max_dist = int(max(distance_data)/1000)
 
         if max_dist >= 1:
-            k1_speed = []
-            for i in range(1,max_dist+1):
-                ind = find_first_index(distance_data, i*1000)
-                k1_speed.append(distance_data[ind]/time_data[ind])
-            stream[1]['1k_speed'] = k1_speed
+            k1_pace = []
+            for j in range(1,max_dist+1):
+                ind = find_first_index(distance_data, j*1000)
+                mins = time_data[ind]/60
+                dist = distance_data[ind]/1000
+                k1_pace.append(mins/dist)
+            activities_data[i]['1k_pace'] = k1_pace
 
         if max_dist >= 5:
-            k5_speed = []
-            for i in range(5,max_dist+1,5):
-                ind = find_first_index(distance_data, i*1000)
-                k5_speed.append(distance_data[ind]/time_data[ind])
-            stream[1]['5k_speed'] = k5_speed
+            k5_pace = []
+            for k in range(5,max_dist+1,5):
+                ind = find_first_index(distance_data, k*1000)
+                mins = time_data[ind]/60
+                dist = distance_data[ind]/1000
+                k5_pace.append(mins/dist)
+            activities_data[i]['5k_pace'] = k5_pace
 
-    return streams_data
+    return activities_data
 
 def clean_data(data: tuple) -> tuple:
     """Main function to clean and transform data."""
     activities_detailed, streams = data[0], data[1]
     filtered_activities_data = filter_activities_data(activities_detailed)
     filtered_streams_data = filer_all_streams(streams)
-    enriched_streams = enrich_with_speeds(filtered_streams_data)
-    return filtered_activities_data, enriched_streams
+    enriched_activities = enrich_with_speeds(filtered_streams_data, filtered_activities_data)
+    return enriched_activities, filtered_streams_data
 
 
 if __name__ == '__main__':
     load_dotenv()
 
-    connection = get_connection(ENV)
-    data, streams = extract_data(connection, ENV, update_check=False)
-    connection.close()
+    # connection = get_connection(ENV)
+    # data, streams = extract_data(connection, ENV, update_check=False)
+    # connection.close()
 
-    clean_activity_data, clean_streams = clean_data((data,streams))
+    # with open('example_stream.json', 'r') as f:
+    #     data = json.load(f)
 
-    print(clean_streams[0])
+    # activities_data = {'0':{}}
+
+    # distance_data = data[1]['distance']
+    # time_data = data[1]['time']
+    # max_dist = int(max(distance_data)/1000)
