@@ -80,7 +80,7 @@ def get_activities(config: _Environ) -> list[dict]:
     all_activities = []
     page = 1
     
-    while True:
+    while True and page <= 5:
         response = get(
             f'{BASE_URL}{end_point}',
             headers=auth_info, timeout=10,
@@ -175,11 +175,13 @@ def get_all_activity_streams(config: _Environ, activity_ids: list[int]) -> list[
 def extract_data(conn, config: _Environ, update_check=True):
     """Main function to extract data."""
     check_access_token(config)
+    print('Getting activities.')
     activities_basic = get_activities(config)
     activity_ids = get_activity_ids(activities_basic)
     if update_check:
         activity_ids = filter_for_stored_data(conn, activity_ids)
     activities_detailed = get_detailed_activities(config, activity_ids)
+    print('Getting streams.')
     streams = get_all_activity_streams(config, activity_ids)
     return activities_detailed, streams
 
