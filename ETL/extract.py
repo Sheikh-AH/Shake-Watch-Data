@@ -75,19 +75,25 @@ def get_stats(config: _Environ) -> dict:
 
 def get_activities(config: _Environ) -> list[dict]:
     """Get a list of activities."""
-
     auth_info = {"Authorization": f'Bearer {config["ACCESS_TOKEN"]}'}
     end_point = '/athlete/activities'
-    response = get(
-        f'{BASE_URL}{end_point}',
-        headers=auth_info, timeout=10,
-        params = {
-        "per_page": 100,
-        "page": 1
-    }
-    ).json()
-
-    runs = [activity for activity in response if activity["sport_type"].lower() == "run"]
+    all_activities = []
+    page = 1
+    
+    while True:
+        response = get(
+            f'{BASE_URL}{end_point}',
+            headers=auth_info, timeout=10,
+            params={"per_page": 100, "page": page}
+        ).json()
+        
+        if not response:
+            break
+        
+        all_activities.extend(response)
+        page += 1
+    
+    runs = [activity for activity in all_activities if activity["sport_type"].lower() == "run"]
     return runs
 
 
