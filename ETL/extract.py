@@ -85,13 +85,16 @@ def get_activities(config: _Environ) -> list[dict]:
     all_activities = []
     page = 1
     
-    while True and page <= 5:
+    while True:
         response = get(
             f'{BASE_URL}{end_point}',
             headers=auth_info, timeout=10,
             params={"per_page": 100, "page": page}
         ).json()
         
+        if not response:
+            break
+
         if 'errors' in response:
             print(response["errors"])
             break
