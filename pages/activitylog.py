@@ -20,13 +20,15 @@ def loading_and_prerequisites() -> tuple:
 def gen_log_title_buttons(config):
     """Create the title, filter and buttons above the activity log."""
     
-    col_title, col_spacer, col_update = st.columns([0.3,0.5,0.2])
+    col_title, col_update = st.columns([0.7,0.3], vertical_alignment='bottom')
 
     col_title.title("Activity Log")
 
     tooltip = "Update the activity log with new activities."
 
-    col_update.button("Update", help=tooltip, on_click=lambda: etl_pipeline(config))
+    with col_update:
+        cont = st.container(horizontal_alignment='right')
+        cont.button("Update", help=tooltip, on_click=lambda: etl_pipeline(config))
 
 
 def gen_activity_log_page(config, df:pd.DataFrame):
@@ -91,6 +93,7 @@ def get_last5_data(df):
 
 
 def gen_summary(df):
+    st.space('small')
     l5tab, monthtab = st.tabs(['Last 5','Last Month'])
 
     with l5tab:
