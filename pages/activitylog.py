@@ -5,8 +5,9 @@ from dotenv import load_dotenv
 import pandas as pd
 import streamlit as st
 
-from tool import get_engine, get_activities_data
+from tool import get_engine, get_activities_data, update_records
 from ETL.pipeline import etl_pipeline
+from ETL.extract import get_connection
 
 def loading_and_prerequisites() -> tuple:
     load_dotenv()
@@ -16,8 +17,16 @@ def loading_and_prerequisites() -> tuple:
     
     return conn, df
 
+def update_activity_log(conn, config):
+    """Callable for update button to update activities/records."""
+    with st.spinner("Updating data ..."):
+        etl_pipeline(config)
+        print('activity updated')
+        update_records(conn)
+        print('records updated')
 
-def gen_log_title_buttons(config):
+
+def gen_log_title_buttons(conn, config):
     """Create the title, filter and buttons above the activity log."""
     
     col_title, col_update = st.columns([0.7,0.3], vertical_alignment='bottom')
@@ -28,12 +37,12 @@ def gen_log_title_buttons(config):
 
     with col_update:
         cont = st.container(horizontal_alignment='right')
-        cont.button("Update", help=tooltip, on_click=lambda: etl_pipeline(config))
+        cont.button("Update", help=tooltip, on_click=lambda: update_activity_log(conn, config))
 
 
-def gen_activity_log_page(config, df:pd.DataFrame):
+def gen_activity_log_page(conn, config, df:pd.DataFrame):
     """Create the activity log."""
-    gen_log_title_buttons(config)
+    gen_log_title_buttons(conn, config)
     
     event = st.dataframe(
         df,
@@ -149,7 +158,7 @@ if __name__ == "__main__":
 
     colLog, spacer, colSummary = st.columns([0.70,0.025,0.275])
     with colLog:
-        gen_activity_log_page(ENV, df)
+        gen_activity_log_page(conn, ENV, df)
     with colSummary:
         gen_summary(df)
 

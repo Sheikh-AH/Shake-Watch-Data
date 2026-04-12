@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
 from json import dump, load
-
+from streamlit import success as st_success
 from sqlalchemy import create_engine
 
 
@@ -48,7 +48,7 @@ def get_stream_field_data(conn, field:str, max_only:bool = False, update:bool = 
     
     df = pd.read_sql(query, conn).dropna()
     if df.empty:
-        raise Exception('No new data found.')
+        return None
 
     if not max_only:
         vals = np.array([int(val) for row in df[field] for val in row])
@@ -95,6 +95,8 @@ def get_records_values(conn, update_check = True) -> dict:
     """Get values for the athlete record stats"""
     records = {}
     heartrate = get_stream_field_data(conn, 'heartrate', update = update_check)
+    if not heartrate:
+        return None
     velocity = get_stream_field_data(conn, 'velocity_smooth', update = update_check)
     cadence = get_stream_field_data(conn, 'cadence', update = update_check)
     power = get_stream_field_data(conn, 'watts', update = update_check)
@@ -152,6 +154,7 @@ def write_records_to_file(vals:dict):
     with open('athlete_data.json', 'w') as f:
         dump(vals, f)
     print('Records have been updated.')
+    st_success('Records have been updated.')
 
 def update_records(conn):
     """Update/Create athlete data file."""
@@ -159,10 +162,15 @@ def update_records(conn):
         with open('athlete_data.json','r') as f:
             current_data = load(f)
         new_data = get_records_values(conn, update_check=True)
-        data = compare_data(current_data, new_data)
+        if not new_data:
+            print('No new data')
+            data = False
+        else:
+            data = compare_data(current_data, new_data)
     else:
         data = get_records_values(conn, update_check=False)
-    write_records_to_file(data)
+    if data:
+        write_records_to_file(data)
 
 def calculate_effort(df: pd.DataFrame):
     """Calculate effort for a run"""
