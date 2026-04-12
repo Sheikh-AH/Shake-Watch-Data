@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from tool import get_engine, get_activities_data
+from ETL.pipeline import etl_pipeline
 
 def loading_and_prerequisites() -> tuple:
     load_dotenv()
@@ -15,7 +16,8 @@ def loading_and_prerequisites() -> tuple:
     
     return conn, df
 
-def gen_log_title_buttons(conn, config):
+
+def gen_log_title_buttons(config):
     """Create the title, filter and buttons above the activity log."""
     
     col_title, col_spacer, col_update = st.columns([0.3,0.5,0.2])
@@ -24,11 +26,12 @@ def gen_log_title_buttons(conn, config):
 
     tooltip = "Update the activity log with new activities."
 
-    col_update.button("Update", help=tooltip, on_click=(lambda:print('Test.')))
+    col_update.button("Update", help=tooltip, on_click=lambda: etl_pipeline(config))
 
-def gen_activity_log_page(conn, config, df:pd.DataFrame):
+
+def gen_activity_log_page(config, df:pd.DataFrame):
     """Create the activity log."""
-    gen_log_title_buttons(conn, config)
+    gen_log_title_buttons(config)
     
     event = st.dataframe(
         df,
@@ -81,9 +84,11 @@ def gen_activity_log_page(conn, config, df:pd.DataFrame):
         st.session_state['activity_id'] = selected_row['activity_id']
         st.switch_page("pages/run.py")
 
+
 def get_last5_data(df):
     last5_data = df.sort_values(by='start_datetime', ascending = False).head(5)['activity_id']
     st.text(last5_data)
+
 
 def gen_summary(df):
     l5tab, monthtab = st.tabs(['Last 5','Last Month'])
@@ -94,6 +99,7 @@ def gen_summary(df):
     
     with monthtab:
         st.header('Monthly')
+
 
 def gen_athlete_records():
     with open('records_table.html') as f:
@@ -118,6 +124,7 @@ def gen_athlete_records():
     
     st.html(html)
 
+
 def gen_achievements():
     listOfAchievements = ['aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
                           'aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
@@ -131,6 +138,7 @@ def gen_achievements():
                     </div>
                 ''')
     
+
 if __name__ == "__main__":
     
     conn, df = loading_and_prerequisites()
@@ -138,7 +146,7 @@ if __name__ == "__main__":
 
     colLog, spacer, colSummary = st.columns([0.70,0.025,0.275])
     with colLog:
-        gen_activity_log_page(conn, ENV, df)
+        gen_activity_log_page(ENV, df)
     with colSummary:
         gen_summary(df)
 
