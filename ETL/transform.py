@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from os import environ as ENV
 import json
 
-from extract import extract_data, get_connection
+from .extract import extract_data, get_connection
 
 def filter_activities_data(activities_data:list[dict]) -> list[dict]:
     filter_list = ('id', 'name', 'calories','distance','moving_time','elapsed_time', 'total_elevation_gain', 'start_date_local', 'start_latlng', 'average_speed')

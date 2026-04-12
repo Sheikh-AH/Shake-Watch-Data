@@ -1,6 +1,5 @@
 """Extract and process watch data."""
 
-import json
 from datetime import datetime
 from os import environ as ENV, _Environ
 
