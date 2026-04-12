@@ -15,8 +15,20 @@ def loading_and_prerequisites() -> tuple:
     
     return conn, df
 
-def gen_activity_log_page(df:pd.DataFrame):
-    st.title("Activity Log")
+def gen_log_title_buttons(conn, config):
+    """Create the title, filter and buttons above the activity log."""
+    
+    col_title, col_spacer, col_update = st.columns([0.3,0.5,0.2])
+
+    col_title.title("Activity Log")
+
+    tooltip = "Update the activity log with new activities."
+
+    col_update.button("Update", help=tooltip, on_click=(lambda:print('Test.')))
+
+def gen_activity_log_page(conn, config, df:pd.DataFrame):
+    """Create the activity log."""
+    gen_log_title_buttons(conn, config)
     
     event = st.dataframe(
         df,
@@ -69,11 +81,9 @@ def gen_activity_log_page(df:pd.DataFrame):
         st.session_state['activity_id'] = selected_row['activity_id']
         st.switch_page("pages/run.py")
 
-
 def get_last5_data(df):
     last5_data = df.sort_values(by='start_datetime', ascending = False).head(5)['activity_id']
     st.text(last5_data)
-
 
 def gen_summary(df):
     l5tab, monthtab = st.tabs(['Last 5','Last Month'])
@@ -84,7 +94,6 @@ def gen_summary(df):
     
     with monthtab:
         st.header('Monthly')
-
 
 def gen_athlete_records():
     with open('records_table.html') as f:
@@ -109,17 +118,27 @@ def gen_athlete_records():
     
     st.html(html)
 
-
-if __name__ == "__main__":
-    
-    conn, df = loading_and_prerequisites()
+def gen_achievements():
     listOfAchievements = ['aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
                           'aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
                           'aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',]
+    with st.container(border=True, gap='small', height=450):
+            acheivements = st.container()
+            for achievement in listOfAchievements:
+                st.html(f'''
+                    <div style="background-color: #52b399; border-radius: 10px; border: 2px solid #44ab46; padding: 10px;">
+                        <p style="color: #000000; margin: 0;">{achievement}</p>
+                    </div>
+                ''')
+    
+if __name__ == "__main__":
+    
+    conn, df = loading_and_prerequisites()
+    
 
     colLog, spacer, colSummary = st.columns([0.70,0.025,0.275])
     with colLog:
-        gen_activity_log_page(df)
+        gen_activity_log_page(conn, ENV, df)
     with colSummary:
         gen_summary(df)
 
@@ -130,14 +149,8 @@ if __name__ == "__main__":
     with colRecords:
         gen_athlete_records()
     with colAchievements:
-        with st.container(border=True, gap='small', height=450):
-            acheivements = st.container()
-            for achievement in listOfAchievements:
-                st.html(f'''
-                    <div style="background-color: #52b399; border-radius: 10px; border: 2px solid #44ab46; padding: 10px;">
-                        <p style="color: #000000; margin: 0;">{achievement}</p>
-                    </div>
-                ''')
+        gen_achievements()
+    
 
 
     

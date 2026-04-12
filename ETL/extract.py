@@ -56,6 +56,12 @@ def check_access_token(config: _Environ) -> None:
         set_key('.env', "ACCESS_TOKEN", response['access_token'])
         set_key('.env', "EXPIRES_AT", str(response['expires_at']))
         set_key('.env', "REFRESH_TOKEN", response['refresh_token'])
+        
+        # Reload environment variables to sync the updated token
+        load_dotenv(override=True)
+        config['ACCESS_TOKEN'] = ENV['ACCESS_TOKEN']
+        config['EXPIRES_AT'] = ENV['EXPIRES_AT']
+        config['REFRESH_TOKEN'] = ENV['REFRESH_TOKEN']
         print('Token Updated')
     else:
         print('Token Valid')
@@ -86,16 +92,15 @@ def get_activities(config: _Environ) -> list[dict]:
             params={"per_page": 100, "page": page}
         ).json()
         
-        if not response:
+        if 'errors' in response:
+            print(response["errors"])
             break
         
         all_activities.extend(response)
         page += 1
     
-    try:
-        runs = [activity for activity in all_activities if activity["sport_type"].lower() == "run"]
-    except TypeError:
-        print(all_activities)
+    runs = [activity for activity in all_activities if activity["sport_type"].lower() == "run"]
+
     return runs
 
 
