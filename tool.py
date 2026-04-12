@@ -28,7 +28,7 @@ def get_activities_data(conn) -> pd.DataFrame:
         a.activity_id,
         a.activity_name,
         a.effort,
-        a.pace
+        a.avg_pace
     FROM activities a
     """
     activities_data = pd.read_sql(query, conn)
