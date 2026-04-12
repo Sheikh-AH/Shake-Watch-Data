@@ -57,7 +57,6 @@ def check_access_token(config: _Environ) -> None:
         set_key('.env', "EXPIRES_AT", str(response['expires_at']))
         set_key('.env', "REFRESH_TOKEN", response['refresh_token'])
         print('Token Updated')
-        load_dotenv()
     else:
         print('Token Valid')
 
@@ -93,7 +92,10 @@ def get_activities(config: _Environ) -> list[dict]:
         all_activities.extend(response)
         page += 1
     
-    runs = [activity for activity in all_activities if activity["sport_type"].lower() == "run"]
+    try:
+        runs = [activity for activity in all_activities if activity["sport_type"].lower() == "run"]
+    except TypeError:
+        print(all_activities)
     return runs
 
 
@@ -178,12 +180,15 @@ def extract_data(conn, config: _Environ, update_check=True):
     print('Getting activities.')
     activities_basic = get_activities(config)
     activity_ids = get_activity_ids(activities_basic)
+    activities_detailed, streams = [], []
     if update_check:
         activity_ids = filter_for_stored_data(conn, activity_ids)
-    activities_detailed = get_detailed_activities(config, activity_ids)
-    print('Getting streams.')
-    streams = get_all_activity_streams(config, activity_ids)
+    if activity_ids:
+        activities_detailed = get_detailed_activities(config, activity_ids)
+        print('Getting streams.')
+        streams = get_all_activity_streams(config, activity_ids)
     return activities_detailed, streams
+
 
 
 if __name__ == '__main__':

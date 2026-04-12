@@ -9,9 +9,12 @@ from load import upload_activities, upload_streams
 def etl_pipeline(conn, config: _Environ):
     """Run the ETL pipeline."""
     activities_detailed, streams = extract_data(conn, config, update_check=True)
-    clean_activities, clean_streams = clean_data((activities_detailed, streams))
-    upload_activities(conn, clean_activities)
-    upload_streams(conn, clean_streams)
+    if activities_detailed:
+        clean_activities, clean_streams = clean_data((activities_detailed, streams))
+        upload_activities(conn, clean_activities)
+        upload_streams(conn, clean_streams)
+    else:
+        print('No new activities.')
 
 
 if __name__ == '__main__':
