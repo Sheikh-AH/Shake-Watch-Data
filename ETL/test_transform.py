@@ -3,6 +3,8 @@
 from pathlib import Path
 import sys
 
+import pytest
+
 BASE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(BASE_DIR))
 
@@ -40,7 +42,6 @@ class TestFilterFuncs:
             'heartrate', 'cadence', 'watts', 'temp', 'moving', 'grade_smooth'
         }
         
-        print(result)
         for field in result.keys():
             assert field in expected_fields
         
@@ -55,3 +56,32 @@ class TestFilterFuncs:
         
         if not streams_example.get('heartrate'):
             assert not result.get('heartrate')
+
+
+class TestEnrichFuncs:
+    """Tests for enrichment functions."""
+
+    def test_calculate_pace(self, pace_data_example):
+        pace = calculate_paces(
+            pace_data_example['max_dist'],
+            pace_data_example['interval'],
+            pace_data_example['time'],
+            pace_data_example['dist']
+        )
+
+        for ind, val in enumerate(pace):
+            assert val == pace_data_example['expected_paces'][ind]
+
+
+    def test_calculate_effort(self, effort_data_example):
+        effort = calculate_effort(
+            effort_data_example['limits'],
+            effort_data_example['run_time'],
+            effort_data_example['run_dist'],
+            effort_data_example['run_hr']
+        )
+        
+        assert effort == pytest.approx(effort_data_example['expected_effort'], abs=5)
+        assert isinstance(effort, (int, float))
+        assert effort >= 0
+
