@@ -146,7 +146,7 @@ def get_detailed_activities(config: _Environ, activity_ids: list[int]):
 def get_activity_streams(config: _Environ, activity_id: int) -> tuple:
     """Get a list of activities."""
 
-    streams = ",".join([
+    streams = ','.join([
         "time",
         "distance",
         "latlng",
@@ -203,9 +203,7 @@ def get_examples_of_extract_data(conn):
     if not path.exists('./example_data/'):
         mkdir('./example_data/')
     data = extract_data(conn, ENV, update_check=False)
-    with open('./example_data/example_extract1.json', 'w') as f:
-        json.dump(data[0][0], f)
-    with open('./example_data/example_extract2.json', 'w') as f:
-        json.dump(data[0][1], f)
-    with open('./example_data/example_extract_stream.json', 'w') as f:
-        json.dump(data[1][0], f)
+    with open('./example_data/example_extract_acts.json', 'w') as f:
+        json.dump(data[0][0], f, indent=4)
+    with open('./example_data/example_extract_streams.json', 'w') as f:
+        json.dump(data[1][0], f, indent=4)
