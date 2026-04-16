@@ -172,26 +172,7 @@ def update_records(conn):
     if data:
         write_records_to_file(data)
 
-def calculate_effort(run_time:int, run_dist: float, run_hr: pd.Series):
-    """Calculate effort for a run"""
-    avg_hr = np.mean(run_hr)
-    with open('athlete_data.json','r') as f:
-        limits = dump(f)
-    max_hr = limits['max_hr']
-    max_time = limits['max_time']
-    max_dist = limits['max_dist']
 
-    t_weight = run_time/max_time
-    dist_weight = run_dist/max_dist
-    hr_weight = avg_hr/(max_hr*0.8)
-    fast_intervals = run_hr.loc(lambda x: x > 1.15*avg_hr).size
-    slow_intervals = run_hr.loc(lambda x: x < 0.85*avg_hr).size
-    total_intervals = run_hr.size
-    interval_weight = (fast_intervals-slow_intervals/total_intervals)
-
-    effort = 1*(2*t_weight+3*dist_weight+8*hr_weight+2*interval_weight)/15
-
-    return effort
 
 
 if __name__ == '__main__':
