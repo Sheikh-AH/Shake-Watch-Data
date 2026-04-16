@@ -39,7 +39,6 @@ def upload_activities(conn, activities: list[dict]):
                 activity.get('5k_pace',[9999])
             )
         )
-        print('Run uploaded.')
     conn.commit()
     cursor.close()
 
@@ -80,6 +79,7 @@ def upload_streams(conn, streams: tuple):
                 stream_data.get('grade_smooth')
             )
         )
+    print(f'{len(streams)} Runs Uploaded.')
     conn.commit()
     cursor.close()
 

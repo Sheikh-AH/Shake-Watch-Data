@@ -1,12 +1,9 @@
 """Process and transform data extracted from the API."""
 
-from dotenv import load_dotenv
-from os import environ as ENV, path
-from json import load
+from os import path
 import numpy as np
+import json
 
-import pandas as pd
-from extract import extract_data, get_connection
 
 
 def filter_activities_data(activities_data:list[dict]) -> list[dict]:
@@ -67,7 +64,6 @@ def calculate_paces(max_dist:float, interval:int, time_stream:list, dist_stream:
         curr_dist = dist_stream[ind]
         mins = (curr_time-prev_time)/60
         dist = (curr_dist-prev_dist)/1000
-        print(mins, dist, mins, curr_dist, curr_time, prev_dist, prev_time, ind)
         pace.append(mins/dist)
         prev_time,prev_dist = curr_time, curr_dist
     
@@ -105,10 +101,7 @@ def calculate_effort(limits:dict, run_time:int, run_dist: float, run_hr: list):
     dist_weight = run_dist/max_dist
     hr_weight = avg_hr/(max_hr*0.75)
 
-
-    effort = 100*(2*t_weight+3*dist_weight+8*hr_weight)/13
-    if effort == 0 or effort > 100:
-        print(t_weight, dist_weight, hr_weight)
+    effort = 100*(2*t_weight+3*dist_weight+7*hr_weight)/12
     return effort
 
 
@@ -117,27 +110,29 @@ def enrich_data(config, activities_data: list, streams_data:list):
 
     ath_data_path = config['ATH_DATA_PATH']
     if path.exists(ath_data_path):
-        with open(ath_data_path,'r') as f:
-            limits = load(f)
         print('Athlete Data Found')
+        with open(ath_data_path, 'r') as f:
+            limits = json.load(f)
     else:
         limits = {}
         limits['max_hr'] = 180
         limits['max_time'] = 30*60
         limits['max_dist'] = 5000
+        print('Athlete Data Not Found')
 
     for ind,val in enumerate(streams_data):
         run_time = activities_data[ind]['moving_time']
         run_dist = activities_data[ind]['distance']
         k1_paces, k5_paces = get_paces(val[1]['time'], val[1]['distance'])
-        if val[1]['heartrate']:
-            effort = int(calculate_effort(limits, run_time, run_dist, val[1])['heartrate'])
+        if val[1].get('heartrate'):
+            effort = int(calculate_effort(limits, run_time, run_dist, val[1]['heartrate']))
         else:
+            print(1)
             effort = None
         activities_data[ind]['1k_pace'] = k1_paces
         activities_data[ind]['5k_pace'] = k5_paces
         activities_data[ind]['effort'] = effort
-        print('Data enriched')
+        print(effort)
     
     return activities_data
 
@@ -151,3 +146,4 @@ def transform_data(config, data: tuple) -> tuple:
     print('Enriching.')
     enriched_activities = enrich_data(config, filtered_acts_data, filtered_streams_data)
     return enriched_activities, filtered_streams_data
+

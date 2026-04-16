@@ -3,7 +3,6 @@ from os import environ as ENV, _Environ
 from dotenv import load_dotenv
 from pathlib import Path
 import sys
-
 import streamlit as st
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,7 +18,6 @@ def etl_pipeline(config: _Environ):
     
     conn = get_connection(config)
     activities_detailed, streams = extract_data(conn, config, update_check=True)
-
     if activities_detailed:
         transformed_acts, transformed_strms = transform_data(config, (activities_detailed, streams))
         upload_activities(conn, transformed_acts)
