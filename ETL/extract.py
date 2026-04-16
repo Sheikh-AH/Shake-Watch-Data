@@ -1,7 +1,8 @@
 """Extract and process watch data."""
 
 from datetime import datetime
-from os import environ as ENV, _Environ
+from os import environ as ENV, _Environ, path, mkdir
+import json
 
 from requests import get, post
 from dotenv import set_key, load_dotenv
@@ -197,15 +198,14 @@ def extract_data(conn, config: _Environ, update_check=True):
     return activities_detailed, streams
 
 
-
-if __name__ == '__main__':
-    load_dotenv()
-    check_access_token(ENV)
-
-    # connection = get_connection(ENV)
-    # data, streams = extract_data(connection, ENV)
-    # connection.close()
-
-    # all_activities = get_activities(ENV)
-    # with open('extracted.json', 'w') as f:
-    #     json.dump(all_activities, f)
+def get_examples_of_extract_data(conn):
+    """Get data obtained from extract function for testing/reference."""
+    if not path.exists('./example_data/'):
+        mkdir('./example_data/')
+    data = extract_data(conn, ENV, update_check=False)
+    with open('./example_data/example_extract1.json', 'w') as f:
+        json.dump(data[0][0], f)
+    with open('./example_data/example_extract2.json', 'w') as f:
+        json.dump(data[0][1], f)
+    with open('./example_data/example_extract_stream.json', 'w') as f:
+        json.dump(data[1][0], f)
