@@ -7,9 +7,9 @@ import json
 import pandas as pd
 import streamlit as st
 
-from tools import get_engine, get_activities_data, update_records
+from data_tools import get_engine, get_activities_data, update_records
 from ETL.pipeline import etl_pipeline
-
+from app_tools.run_page_tools import effort_gauge
 
 def loading_and_prerequisites() -> tuple:
     load_dotenv()
@@ -101,7 +101,8 @@ def gen_activity_log_page(conn, config, df:pd.DataFrame):
 
 def get_last5_data(df):
     last5_data = df.sort_values(by='start_datetime', ascending = False).head(5)['activity_id']
-    st.text(last5_data)
+    avg_effort = df['effort'].mean()
+    st.progress(avg_effort/100, text='Avg. Effort')
 
 
 def gen_summary(df):
@@ -140,17 +141,14 @@ def gen_athlete_records():
 
 
 def gen_achievements():
-    listOfAchievements = ['aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
-                          'aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',
-                          'aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw','aaafgeasgeaw',]
+    listOfAchievements = []
     with st.container(border=True, gap='small', height=450):
-            acheivements = st.container()
-            for achievement in listOfAchievements:
-                st.html(f'''
-                    <div style="background-color: #52b399; border-radius: 10px; border: 2px solid #44ab46; padding: 10px;">
-                        <p style="color: #000000; margin: 0;">{achievement}</p>
-                    </div>
-                ''')
+        for achievement in listOfAchievements:
+            st.html(f'''
+                <div style="background-color: #52b399; border-radius: 10px; border: 2px solid #44ab46; padding: 10px;">
+                    <p style="color: #000000; margin: 0;">{achievement}</p>
+                </div>
+            ''')
 
 
 def gen_badges():
@@ -160,14 +158,14 @@ def gen_badges():
 
 if __name__ == "__main__":
     
-    conn, df = loading_and_prerequisites()
+    conn, all_runs_df = loading_and_prerequisites()
     
 
     colLog, spacer, colSummary = st.columns([0.70,0.025,0.275])
     with colLog:
-        gen_activity_log_page(conn, ENV, df)
+        gen_activity_log_page(conn, ENV, all_runs_df)
     with colSummary:
-        gen_summary(df)
+        gen_summary(all_runs_df)
 
     st.space('small')
 

@@ -18,6 +18,7 @@ def get_engine(_config: _Environ):
     )
     return create_engine(connection_string)
 
+
 def get_activities_data(conn) -> pd.DataFrame:
     """Join data for activity log."""
     query = """
@@ -34,6 +35,7 @@ def get_activities_data(conn) -> pd.DataFrame:
     activities_data = pd.read_sql(query, conn)
     df = activities_data.sort_values(by='start_datetime', ascending=False)
     return df
+
 
 def get_stream_field_data(conn, field:str, max_only:bool = False, update:bool = True):
     """Gets data for a single field from stream_sets table in db. Removes lowest 5%"""
@@ -58,6 +60,7 @@ def get_stream_field_data(conn, field:str, max_only:bool = False, update:bool = 
         vals = vals.max()
 
     return vals
+
 
 def get_total_records(conn, update = True) -> tuple:
     """Get the total distance, time and count of runs."""
@@ -91,6 +94,7 @@ def get_total_records(conn, update = True) -> tuple:
 
     return run_count, total_time, total_dist, total_calories, min_1k, min_5k
 
+
 def get_records_values(conn, update_check = True) -> dict:
     """Get values for the athlete record stats"""
     records = {}
@@ -118,6 +122,7 @@ def get_records_values(conn, update_check = True) -> dict:
     records['min_1k'] = round(float(min_1k),2)
     records['min_5k'] = round(float(min_5k),2)
     return records
+
 
 def compare_data(current:dict, new:dict) -> dict:
     """Compare new and old record data."""
@@ -149,12 +154,14 @@ def compare_data(current:dict, new:dict) -> dict:
     
     return updated
 
+
 def write_records_to_file(vals:dict):
     """Update the athlete record stats json file with new values"""
     with open('athlete_data.json', 'w') as f:
         dump(vals, f)
     print('Records have been updated.')
     st_success('Records have been updated.')
+
 
 def update_records(conn):
     """Update/Create athlete data file."""
@@ -171,8 +178,6 @@ def update_records(conn):
         data = get_records_values(conn, update_check=False)
     if data:
         write_records_to_file(data)
-
-
 
 
 if __name__ == '__main__':
