@@ -2,12 +2,14 @@
 
 from os import environ as ENV, _Environ
 from dotenv import load_dotenv
+import json
+
 import pandas as pd
 import streamlit as st
 
-from tool import get_engine, get_activities_data, update_records
+from tools import get_engine, get_activities_data, update_records
 from ETL.pipeline import etl_pipeline
-from ETL.extract import get_connection
+
 
 def loading_and_prerequisites() -> tuple:
     load_dotenv()
@@ -16,6 +18,7 @@ def loading_and_prerequisites() -> tuple:
     st.markdown('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">', unsafe_allow_html=True)
     
     return conn, df
+
 
 def update_activity_log(conn, config):
     """Callable for update button to update activities/records."""
@@ -116,20 +119,19 @@ def gen_summary(df):
 def gen_athlete_records():
     with open('records_table.html') as f:
         html = f.read()
+    
+    with open('athlete_data.json') as ath_data:
+        data = json.load(ath_data)
+    
+    values = {}
 
-    values = {
-        '{{run_count}}': 'value1 m/s',
-        '{{max1kmPace}}': 'value1 m/s',
-        '{{max5kmPace}}': 'value2 m/s',
-        '{{maxPace}}': 'value3 m/s',
-        '{{avgPace}}': 'value4 m/s',
-        '{{maxHeartrate}}': 'value5 bpm',
-        '{{avgHeartrate}}': 'value6 bpm',
-        '{{maxDistance}}': 'value7 km',
-        '{{maxAltitude}}': 'value8 m',
-        '{{avgPower}}': 'value9 W',
-        '{{avgCadence}}': 'value10 rpm',
-    }
+    exclude = ('max_altitude', 'last_updated')
+
+    for key in data.keys():
+        if key not in exclude:
+            values[f'{{{key}}}'] = data[key]
+    
+
     
     for placeholder, value in values.items():
         html = html.replace(placeholder, str(value))
@@ -149,7 +151,12 @@ def gen_achievements():
                         <p style="color: #000000; margin: 0;">{achievement}</p>
                     </div>
                 ''')
-    
+
+
+def gen_badges():
+    """Create badge icons."""
+    pass
+
 
 if __name__ == "__main__":
     
@@ -170,7 +177,4 @@ if __name__ == "__main__":
         gen_athlete_records()
     with colAchievements:
         gen_achievements()
-    
 
-
-    
