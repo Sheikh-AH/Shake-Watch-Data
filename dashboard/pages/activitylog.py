@@ -20,12 +20,14 @@ RECORDS_FILE = BASE_DIR + '/dashboard/app_utils/records_table.html'
 
 
 def loading_and_prerequisites(ath_data_file_path:str) -> tuple:
+    """Load prerequisite values, config and data."""
     load_dotenv()
     conn = get_engine(ENV)
     df = get_activities_data(conn)
     st.markdown('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">', unsafe_allow_html=True)
     with open(ath_data_file_path) as ath_data:
         data = json.load(ath_data)
+
     return conn, df, data
 
 
@@ -39,13 +41,10 @@ def update_activity_log(conn):
 
 def gen_log_title_buttons(conn):
     """Create the title, filter and buttons above the activity log."""
-    
     col_title, col_update = st.columns([0.7,0.3], vertical_alignment='bottom')
 
     col_title.title("Activity Log")
-
     tooltip = "Update the activity log with new activities."
-
     with col_update:
         cont = st.container(horizontal_alignment='right')
         cont.button("Update", help=tooltip, on_click=lambda: update_activity_log(conn))
@@ -101,8 +100,8 @@ def gen_activity_log_page(conn, df:pd.DataFrame):
         hide_index=True,
     )
 
-    if event.selection.rows: # type: ignore
-        selected_row = df.iloc[event.selection.rows[0]] # type: ignore
+    if event.selection.rows:
+        selected_row = df.iloc[event.selection.rows[0]]
         st.session_state['activity_id'] = selected_row['activity_id']
         st.switch_page("pages/run.py")
 
@@ -120,10 +119,9 @@ def render_metric_row(current_value, previous_value, label):
         st.image(icon, width='content')
 
 
-def get_last5_data(df, ath_data):
+def gen_last5_data(df, ath_data):
+    """Generate gauges and metrics for last 5 runs sections."""
     last10 = df.sort_values(by='start_datetime', ascending = False).head(10)
-    last5 = df.sort_values(by='start_datetime', ascending = False).head(5)
-    prev5 = df.sort_values(by='start_datetime', ascending = False).iloc[5:10]
     max_pace = 1000/(60*(ath_data['min_1k']))
 
     avg_effort = last10[:5]['effort'].mean()
@@ -150,22 +148,23 @@ def get_last5_data(df, ath_data):
         
         
 def gen_summary(df, ath_data):
+    """Generate dashboard elements for last 5 runs and monthly summary section."""
     st.space('small')
     l5tab, monthtab = st.tabs(['Last 5','Last Month'])
 
     with l5tab:
-        get_last5_data(df, ath_data)
+        gen_last5_data(df, ath_data)
     
     with monthtab:
         st.header('Monthly')
 
 
 def gen_athlete_records(data):
+    """Generate records table for dashboard."""
     with open(RECORDS_FILE) as f:
         html = f.read()
     
     values = {}
-
     exclude = ('max_altitude', 'last_updated')
 
     for key in data.keys():
@@ -179,6 +178,7 @@ def gen_athlete_records(data):
 
 
 def gen_achievements():
+    """Generate achievements section for dashboard."""
     listOfAchievements = []
     with st.container(border=True, gap='small', height=450):
         for achievement in listOfAchievements:
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     conn, all_runs_df, ath_data = loading_and_prerequisites(ATH_FILE)
     
 
-    colLog, spacer, colSummary = st.columns([0.675,0.025,0.3])
+    colLog, colSummary = st.columns([0.7,0.3], gap="large")
     with colLog:
         gen_activity_log_page(conn, all_runs_df)
     with colSummary:
@@ -207,7 +207,7 @@ if __name__ == "__main__":
 
     st.space('small')
 
-    st.title('Athlete Records')
+    st.title('Records & Milestones')
     colRecords, spacer, colAchievements = st.columns([0.5, 0.025,0.475])
     with colRecords:
         gen_athlete_records(ath_data)
