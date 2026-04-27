@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from os import environ as ENV, _Environ, path, mkdir
+from pathlib import Path
 import json
 
 from requests import get, post
@@ -10,6 +11,7 @@ from psycopg2 import connect
 
 
 BASE_URL = 'https://www.strava.com/api/v3'
+ENV_FILE = str(Path(__file__).resolve().parent / '.env')
 
 
 def get_connection(config: _Environ):
@@ -35,9 +37,9 @@ def get_access_token(config: _Environ) -> None:
     response = post('https://www.strava.com/api/v3/oauth/token',
                     data=post_data, timeout=10).json()
 
-    set_key('.env', "ACCESS_TOKEN", response['access_token'])
-    set_key('.env', "EXPIRES_AT", str(response['expires_at']))
-    set_key('.env', "REFRESH_TOKEN", response['refresh_token'])
+    set_key(ENV_FILE, "ACCESS_TOKEN", response['access_token'])
+    set_key(ENV_FILE, "EXPIRES_AT", str(response['expires_at']))
+    set_key(ENV_FILE, "REFRESH_TOKEN", response['refresh_token'])
 
 
 def check_access_token(config: _Environ) -> None:
@@ -53,12 +55,12 @@ def check_access_token(config: _Environ) -> None:
             'https://www.strava.com/api/v3/oauth/token',
             data=post_data, timeout=10
         ).json()
-        set_key('.env', "ACCESS_TOKEN", response['access_token'])
-        set_key('.env', "EXPIRES_AT", str(response['expires_at']))
-        set_key('.env', "REFRESH_TOKEN", response['refresh_token'])
+        set_key(ENV_FILE, "ACCESS_TOKEN", response['access_token'])
+        set_key(ENV_FILE, "EXPIRES_AT", str(response['expires_at']))
+        set_key(ENV_FILE, "REFRESH_TOKEN", response['refresh_token'])
         
         # Reload environment variables to sync the updated token
-        load_dotenv(override=True)
+        load_dotenv(ENV_FILE, override=True)
         config['ACCESS_TOKEN'] = ENV['ACCESS_TOKEN']
         config['EXPIRES_AT'] = ENV['EXPIRES_AT']
         config['REFRESH_TOKEN'] = ENV['REFRESH_TOKEN']

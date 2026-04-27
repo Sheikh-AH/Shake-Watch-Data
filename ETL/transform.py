@@ -3,8 +3,10 @@
 from os import path
 import numpy as np
 import json
+from pathlib import Path
 
-
+BASE_DIR = str(Path(__file__).resolve().parent.parent)
+ATH_FILE = BASE_DIR + '/dashboard/app_utils/athlete_data.json'
 
 def filter_activities_data(activities_data:list[dict]) -> list[dict]:
     filter_list = ('id', 'name', 'calories','distance','moving_time','elapsed_time', 'total_elevation_gain', 'start_date_local', 'start_latlng', 'average_speed')
@@ -105,13 +107,12 @@ def calculate_effort(limits:dict, run_time:int, run_dist: float, run_hr: list):
     return effort
 
 
-def enrich_data(config, activities_data: list, streams_data:list):
+def enrich_data(ath_file_path, activities_data: list, streams_data:list):
     """Enrich data with effort values"""
 
-    ath_data_path = config['ATH_DATA_PATH']
-    if path.exists(ath_data_path):
+    if path.exists(ath_file_path):
         print('Athlete Data Found')
-        with open(ath_data_path, 'r') as f:
+        with open(ath_file_path, 'r') as f:
             limits = json.load(f)
     else:
         limits = {}
@@ -127,23 +128,21 @@ def enrich_data(config, activities_data: list, streams_data:list):
         if val[1].get('heartrate'):
             effort = int(calculate_effort(limits, run_time, run_dist, val[1]['heartrate']))
         else:
-            print(1)
             effort = None
         activities_data[ind]['1k_pace'] = k1_paces
         activities_data[ind]['5k_pace'] = k5_paces
         activities_data[ind]['effort'] = effort
-        print(effort)
     
     return activities_data
 
 
-def transform_data(config, data: tuple) -> tuple:
+def transform_data(data: tuple, ath_file_path=ATH_FILE) -> tuple:
     """Main function to clean and transform data."""
     activities_detailed, streams = data[0], data[1]
     print('Filtering.')
     filtered_acts_data = filter_activities_data(activities_detailed)
     filtered_streams_data = filer_all_streams(streams)
     print('Enriching.')
-    enriched_activities = enrich_data(config, filtered_acts_data, filtered_streams_data)
+    enriched_activities = enrich_data(ath_file_path, filtered_acts_data, filtered_streams_data)
     return enriched_activities, filtered_streams_data
 

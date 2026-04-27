@@ -1,6 +1,11 @@
 """Entry point for the Streamlit Watch Data Dashboard application."""
 
+import sys
+from pathlib import Path
 import streamlit as st
+
+BASE_DIR = str(Path(__file__).resolve().parent.parent)
+sys.path.append(BASE_DIR)
 
 st.set_page_config(page_title="Watch Data Dashboard", layout="wide")
 

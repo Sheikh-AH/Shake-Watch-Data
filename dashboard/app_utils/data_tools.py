@@ -1,14 +1,19 @@
 """Contains helper functions for app and pipeline."""
 
+import sys
 from os import environ as ENV, _Environ, path
 from datetime import datetime
 from dotenv import load_dotenv
+
+from pathlib import Path
 import pandas as pd
 import numpy as np
 from json import dump, load
 from streamlit import success as st_success
 from sqlalchemy import create_engine
 
+BASE_DIR = str(Path(__file__).resolve().parent.parent.parent)
+ATH_FILE = BASE_DIR + '/dashboard/app_utils/athlete_data.json'
 
 def get_engine(_config: _Environ):
     """Get sqlalchemy engine."""
@@ -29,7 +34,8 @@ def get_activities_data(conn) -> pd.DataFrame:
         a.activity_id,
         a.activity_name,
         a.effort,
-        a.avg_pace
+        a.avg_pace,
+        a.distance
     FROM activities a
     """
     activities_data = pd.read_sql(query, conn)
@@ -43,7 +49,7 @@ def get_stream_field_data(conn, field:str, max_only:bool = False, update:bool = 
     if not update:
         query = f"SELECT {field} FROM stream_sets"
     else:
-        with open('athlete_data.json','r') as f:
+        with open(ATH_FILE,'r') as f:
             data = load(f)
             last_updated = data['last_updated']
         query = f"SELECT ss.{field} FROM stream_sets AS ss JOIN activities USING (activity_id) WHERE start_datetime > '{last_updated}'"
@@ -66,10 +72,10 @@ def get_total_records(conn, update = True) -> tuple:
     """Get the total distance, time and count of runs."""
     query = "SELECT moving_time, distance, calories, pace_1k, pace_5k FROM activities"
     if update:
-        with open('athlete_data.json','r') as f:
+        with open(ATH_FILE,'r') as f:
             data = load(f)
             last_updated = data['last_updated']
-        query += f"WHERE start_datetime > '{last_updated}'"
+        query += f" WHERE start_datetime > '{last_updated}'"
 
     df = pd.read_sql(query, conn)
     if df.empty:
@@ -79,8 +85,8 @@ def get_total_records(conn, update = True) -> tuple:
     total_dist = np.array(df['distance']).sum()
     total_calories = np.array(df['calories']).sum()
 
-    k1 = np.array([min(row) for row in df['pace_1k'] if row != [9999]])
-    k5 = np.array([min(row) for row in df['pace_5k'] if row != [9999]])
+    k1 = np.array([min(row) for row in df['pace_1k'] if row != [9999] and row is not None])
+    k5 = np.array([min(row) for row in df['pace_5k'] if row != [9999] and row is not None])
     if len(k1) != 0:
         min_1k = k1.min()
     else:
@@ -99,7 +105,8 @@ def get_records_values(conn, update_check = True) -> dict:
     """Get values for the athlete record stats"""
     records = {}
     heartrate = get_stream_field_data(conn, 'heartrate', update = update_check)
-    if not heartrate:
+    print(heartrate)
+    if heartrate is None:
         return None
     velocity = get_stream_field_data(conn, 'velocity_smooth', update = update_check)
     cadence = get_stream_field_data(conn, 'cadence', update = update_check)
@@ -148,7 +155,7 @@ def compare_data(current:dict, new:dict) -> dict:
 
     for key in total_keys:
         if key in new and new[key] is not None:
-            updated[key] += key
+            updated[key] += new[key]
 
     updated['last_updated'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
@@ -157,7 +164,7 @@ def compare_data(current:dict, new:dict) -> dict:
 
 def write_records_to_file(vals:dict):
     """Update the athlete record stats json file with new values"""
-    with open('athlete_data.json', 'w') as f:
+    with open(ATH_FILE, 'w') as f:
         dump(vals, f)
     print('Records have been updated.')
     st_success('Records have been updated.')
@@ -165,8 +172,8 @@ def write_records_to_file(vals:dict):
 
 def update_records(conn):
     """Update/Create athlete data file."""
-    if path.exists('athlete_data.json'):
-        with open('athlete_data.json','r') as f:
+    if path.exists(ATH_FILE):
+        with open(ATH_FILE,'r') as f:
             current_data = load(f)
         new_data = get_records_values(conn, update_check=True)
         if not new_data:
@@ -182,8 +189,8 @@ def update_records(conn):
 
 if __name__ == '__main__':
     load_dotenv()
-    conn = get_engine(ENV)
+    # conn = get_engine(ENV)
 
     # update_records(conn)
-    data = get_records_values(conn, update_check=False)
-    write_records_to_file(data)
+    # data = get_records_values(conn, update_check=False)
+    # write_records_to_file(data)
